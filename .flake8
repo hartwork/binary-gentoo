@@ -1,0 +1,5 @@
+[flake8]
+# E251 unexpected spaces around keyword / parameter equals
+ignore =
+    E251
+max-line-length = 99
