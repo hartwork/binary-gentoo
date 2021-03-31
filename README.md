@@ -28,6 +28,13 @@ and are meant to be combined using a glue language like Bash:
 is software libre licensed under the `GNU Affero GPL version 3 or later` license.
 
 
+# Installation
+
+```console
+# pip install binary-gentoo
+```
+
+
 # Design Decisions
 
 - All code in **binary-gentoo** must work on a non-Gentoo Linux machine,
