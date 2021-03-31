@@ -1,3 +1,5 @@
+[![Build and smoke test](https://github.com/hartwork/binary-gentoo/actions/workflows/smoke_test.yml/badge.svg)](https://github.com/hartwork/binary-gentoo/actions/workflows/smoke_test.yml)
+
 # About
 
 **binary-gentoo**

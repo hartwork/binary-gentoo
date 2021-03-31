@@ -1,0 +1,92 @@
+# Copyright (C) 2021 Sebastian Pipping <sebastian@pipping.org>
+# Licensed under GNU Affero GPL version 3 or later
+
+name: Build and smoke test
+
+on:
+  pull_request:
+  push:
+  schedule:
+    - cron: '0 3 * * 5'  # Every Friday at 3am
+
+jobs:
+  build_and_test:
+    strategy:
+      matrix:
+        python-version: [3.6, 3.9]  # no explicit need for 3.7, 3.8
+    name: Build and smoke test
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2.3.4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2.2.1
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Add Docker Repository
+        run: |-
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends -V \
+              apt-transport-https \
+              ca-certificates \
+              curl \
+              gnupg \
+              lsb-release
+          curl -fsSL https://download.docker.com/linux/ubuntu/gpg \
+              | sudo gpg --dearmor -o /usr/share/keyrings/docker-archive-keyring.gpg
+          echo "deb [arch=amd64 signed-by=/usr/share/keyrings/docker-archive-keyring.gpg] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable" \
+              | sudo tee /etc/apt/sources.list.d/docker.list
+
+      - name: Install build dependencies
+        run: |-
+          sudo apt-get update
+          sudo apt-get install --yes --no-install-recommends -V \
+              docker-ce \
+              docker-ce-cli \
+              containerd.io
+
+      - name: Install
+        run: |-
+          pip install \
+            --disable-pip-version-check \
+            --user \
+            --ignore-installed \
+            pip setuptools wheel
+          hash pip
+          pip install \
+            --disable-pip-version-check \
+            --user \
+            --no-warn-script-location \
+            .
+          echo "PATH=${HOME}/.local/bin:${PATH}" >> "${GITHUB_ENV}"
+
+      - name: Smoke test
+        run: |-
+          set -x
+
+          gentoo-local-queue --version
+          gentoo-package-build --version
+          gentoo-tree-diff --version
+          gentoo-tree-sync --version
+
+          mkdir etc-portage/
+          echo 'ACCEPT_KEYWORDS="~amd64"' > etc-portage/make.conf
+
+          gentoo-tree-sync --non-interactive portdir/
+
+          gentoo-package-build \
+              --non-interactive \
+              --gentoo-profile default/linux/amd64/17.1/developer \
+              --cflags '-O0 -pipe' \
+              --cxxflags '-O0 -pipe' \
+              --ldflags '-Wl,-O0 -Wl,--as-needed' \
+              --cpu-flags-x86 '' \
+              --portdir portdir/ \
+              --pkgdir packages/ \
+              --distdir distfiles/ \
+              --logdir logs/ \
+              --etc-portage etc-portage/ \
+              media-gfx/optipng
+
+          find logs/ packages/
