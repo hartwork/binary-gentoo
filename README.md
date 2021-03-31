@@ -39,9 +39,9 @@ is software libre licensed under the `GNU Affero GPL version 3 or later` license
 
 - Big packages like Chromium need a pile of RAM and CPU time.
   Therefore, the build defaults to `MAKETOPTS=-j1`
-  the package of interest is emerged seperate from it dependencies.
+  the package of interest is emerged separate from it dependencies.
   That allows to build e.g. a package of Chromium in a VM with only 8 GB of RAM.
 
-- With regard to dependency constrainst,
+- With regard to dependency constraints,
   some packages can be *built* without conflicts but not be *installed* without conflicts.
-  Hence the default is to only install depencies, but not the package of interest.
+  Hence the default is to only install dependencies, but not the package of interest.
