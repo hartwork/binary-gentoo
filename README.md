@@ -7,6 +7,9 @@ is a collection of
 simple
 CLI tools
 to help **build Gentoo packages on a non-Gentoo Linux host**, primarily.
+A typical scenario is operation of an
+**_active_ [Gentoo binary package host](https://wiki.gentoo.org/wiki/Binary_package_guide#Setting_up_a_binary_package_host)**
+ — an active "binhost".
 
 *Secondarily*, **binary-gentoo** can also build Gentoo packages on a Gentoo host
 with Docker isolation and a full `emerge` perspective
