@@ -30,6 +30,8 @@ is software libre licensed under the `GNU Affero GPL version 3 or later` license
 
 # Installation
 
+Install Docker, Python >=3.6, pip and rsync and then:
+
 ```console
 # pip install binary-gentoo
 ```
