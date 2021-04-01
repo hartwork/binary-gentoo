@@ -40,7 +40,7 @@ Install Docker, Python >=3.6, pip and rsync and then:
 # Design Decisions
 
 - All code in **binary-gentoo** must work on a non-Gentoo Linux machine,
-  provided that it has Docker installed and working internet access
+  provided that it has Docker installed and working internet access.
 
 - If dependency problems block a package from being built,
   there should be a log showing that problem.
