@@ -1,6 +1,8 @@
 [![Build and smoke test](https://github.com/hartwork/binary-gentoo/actions/workflows/smoke_test.yml/badge.svg)](https://github.com/hartwork/binary-gentoo/actions/workflows/smoke_test.yml)
 
-# About
+# binary-gentoo
+
+## About
 
 **binary-gentoo**
 is a collection of
@@ -28,7 +30,7 @@ and are meant to be combined using a glue language like Bash:
 is software libre licensed under the `GNU Affero GPL version 3 or later` license.
 
 
-# Installation
+## Installation
 
 Install Docker, Python >=3.6, pip and rsync and then:
 
@@ -37,7 +39,7 @@ Install Docker, Python >=3.6, pip and rsync and then:
 ```
 
 
-# Active Binhost Operation
+## Active Binhost Operation
 
 To set-up an active binhost using **binary-gentoo** you will likely need
 a virtual machine with…
@@ -76,12 +78,12 @@ a virtual machine with…
   - sleeps every now and then
 
 
-# Determining Ideal Build Flags
+## Determining Ideal Build Flags
 
 Let me give a concrete example.
 
 
-## Consumer Machine
+### Consumer Machine
 
 On the consumer machine, we have this hardware situation:
 
@@ -97,7 +99,7 @@ CPU_FLAGS_X86: aes avx mmx mmxext pclmul popcnt sse sse2 sse3 sse4_1 sse4_2 ssse
 ```
 
 
-## Producer Machine
+### Producer Machine
 
 On the [producer machine](https://www.netcup.de/bestellen/produkt.php?produkt=2554),
 we have this hardware situation:
@@ -114,7 +116,7 @@ CPU_FLAGS_X86: aes mmx mmxext pclmul popcnt rdrand sse sse2 sse3 sse4_1 sse4_2 s
 ```
 
 
-## Resulting Producer Build Flags
+### Resulting Producer Build Flags
 
 
 Simplified, we are looking for flags
@@ -131,7 +133,7 @@ For the example above, I ended up with these values for the producer machine:
 - `CPU_FLAGS_X86`: `aes mmx mmxext pclmul popcnt sse sse2 sse3 sse4_1 sse4_2 ssse3` (i.e. without `avx` and without `rdrand`)
 
 
-# Design Decisions
+## Design Decisions
 
 - All code in **binary-gentoo** must work on a non-Gentoo Linux machine,
   provided that it has Docker installed and working internet access.
