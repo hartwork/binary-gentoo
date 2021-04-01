@@ -45,9 +45,9 @@ To set-up an active binhost using **binary-gentoo** you will likely need
 a virtual machine with…
 
 - Enough resources, i.e. probably
-  - >=2 virtual cores
-  - >=8 GB RAM
-  - >=100 GB disk space
+  - []()>=2 virtual cores
+  - []()>=8 GB RAM
+  - []()>=100 GB disk space
 - Some distribution of Linux
 - Auto-updates enabled to stay reasonably secure over time
 - Runtime dependencies installed:
