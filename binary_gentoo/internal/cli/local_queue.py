@@ -150,7 +150,7 @@ def parse_command_line(argv):
                         default=os.path.expanduser('~/.gentoo-build-queue.json'),
                         help='where to store state (default: "%(default)s")')
 
-    subparsers = parser.add_subparsers(title='sub-cli', dest='command')
+    subparsers = parser.add_subparsers(title='sub-cli', dest='command', required=True)
 
     push_command = subparsers.add_parser('push', description='Add atoms to the queue')
     push_command.add_argument('priority',
