@@ -73,7 +73,9 @@ a virtual machine with…
   - respects your exclusion list
     (e.g. something like `*sys-kernel/*|*-bin-*|*-9999*|*acct-*/*`)
   - pushes `gentoo-tree-diff` news onto the queue
-  - pops atoms off the queue for a build using `gentoo-package-build`
+  - pops off the queue,
+    extracts the atom using e.g. `jq -r '.atom'`,
+    and then let's `gentoo-package-build` do a build
   - loops forever
   - sleeps every now and then
 
