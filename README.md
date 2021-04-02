@@ -74,7 +74,7 @@ a virtual machine with…
     (e.g. something like `*sys-kernel/*|*-bin-*|*-9999*|*acct-*/*`)
   - pushes `gentoo-tree-diff` news onto the queue
   - pops off the queue,
-    extracts the atom using e.g. `jq -r '.atom'`,
+    extracts the atom using e.g. `jq -r .atom`,
     and then let's `gentoo-package-build` do a build
   - loops forever
   - sleeps every now and then
