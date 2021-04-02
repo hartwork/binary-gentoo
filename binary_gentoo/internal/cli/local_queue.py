@@ -14,6 +14,11 @@ from ..reporter import exception_reporting
 from ..version import VERSION_STR
 
 
+def _dump_json_for_humans(obj, fp):
+    """Wrapper around ``json.dump`` with custom config"""
+    json.dump(obj, fp, indent='  ', sort_keys='True')
+
+
 class MultiQueue:
     def __init__(self):
         self._push_count = 0
@@ -88,7 +93,7 @@ class MultiQueue:
         temp_filename = f'{filename}.tmp'
 
         with open(temp_filename, 'w') as f:
-            json.dump(doc, f, indent='  ', sort_keys='True')
+            _dump_json_for_humans(doc, f)
 
         os.rename(temp_filename, filename)
 
