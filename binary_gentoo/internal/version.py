@@ -1,1 +1,1 @@
-VERSION_STR = '1.0.0'
+VERSION_STR = '2.0.0'
