@@ -57,11 +57,11 @@ class MultiQueue:
 
     def pop(self):
         try:
-            _, _, atom = heapq.heappop(self._min_heap)
+            prority, _, atom = heapq.heappop(self._min_heap)
         except IndexError:
             raise IndexError('All queues are empty')
         del self._priority_of[atom]
-        return atom
+        return atom, prority
 
     def __iter__(self):
         for item in heapq.nsmallest(len(self._min_heap), self._min_heap):
@@ -121,9 +121,16 @@ def run_push(config):
 
 def run_pop(config):
     muq = MultiQueue.load(config.state_filename)
-    atom = muq.pop()
+    atom, priority = muq.pop()
     muq.save(config.state_filename)
-    print(atom)
+
+    doc = {
+        'atom': atom,
+        'priority': priority,
+        'version': 2,
+    }
+
+    _dump_json_for_humans(doc, sys.stdout)
 
 
 def run_show(config):
