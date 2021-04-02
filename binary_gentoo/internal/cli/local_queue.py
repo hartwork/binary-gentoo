@@ -17,6 +17,7 @@ from ..version import VERSION_STR
 def _dump_json_for_humans(obj, fp):
     """Wrapper around ``json.dump`` with custom config"""
     json.dump(obj, fp, indent='  ', sort_keys='True')
+    print(file=fp)  # i.e. trailing newline
 
 
 class MultiQueue:
