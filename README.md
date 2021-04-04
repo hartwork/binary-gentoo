@@ -32,7 +32,7 @@ is software libre licensed under the `GNU Affero GPL version 3 or later` license
 
 ## Installation
 
-Install Docker, Python >=3.6, pip and rsync and then:
+Install Docker, Python >=3.7, pip and rsync and then:
 
 ```console
 # pip install binary-gentoo
@@ -52,7 +52,7 @@ a virtual machine with…
 - Auto-updates enabled to stay reasonably secure over time
 - Runtime dependencies installed:
   - Docker
-  - Python >=3.6
+  - Python >=3.7
   - rsync
 - An SSH or an HTTP daemon
   (to serve the produced binaries to your consuming Gentoo boxes,
