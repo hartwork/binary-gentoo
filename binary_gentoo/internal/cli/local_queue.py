@@ -8,6 +8,7 @@ import os
 import sys
 from argparse import ArgumentParser
 from contextlib import contextmanager, suppress
+from typing import Set
 
 from ..atoms import ATOM_LIKE_DISPLAY
 from ..reporter import exception_reporting
@@ -31,15 +32,19 @@ class MultiQueue:
         heapq.heappush(self._min_heap, item)
         self._push_count += 1
 
-    def _remove_from_min_heap(self, atom):
+    def _remove_from_min_heap(self, atoms: Set[str]) -> Set[str]:
         items = []
+        removed_atoms = set()
+
         while True:
             try:
                 item = heapq.heappop(self._min_heap)
             except IndexError:
                 break
             else:
-                if item[2] == atom:
+                _, _, atom = item
+                if atom in atoms:
+                    removed_atoms.add(atom)
                     continue
                 items.append(item)
 
@@ -47,11 +52,13 @@ class MultiQueue:
         for item in items:
             heapq.heappush(self._min_heap, item)
 
+        return removed_atoms
+
     def push(self, priority: float, atom: str):
         if atom in self._priority_of:
             if self._priority_of[atom] <= priority:
                 return
-            self._remove_from_min_heap(atom)
+            self._remove_from_min_heap({atom})
         self._priority_of[atom] = priority
         self._push_to_min_heap(priority, atom)
 
