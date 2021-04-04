@@ -8,6 +8,7 @@ import os
 import sys
 from argparse import ArgumentParser
 from contextlib import contextmanager, suppress
+from typing import List, Set
 
 from ..atoms import ATOM_LIKE_DISPLAY
 from ..reporter import exception_reporting
@@ -31,15 +32,19 @@ class MultiQueue:
         heapq.heappush(self._min_heap, item)
         self._push_count += 1
 
-    def _remove_from_min_heap(self, atom):
+    def _remove_from_min_heap(self, atoms: Set[str]) -> Set[str]:
         items = []
+        removed_atoms = set()
+
         while True:
             try:
                 item = heapq.heappop(self._min_heap)
             except IndexError:
                 break
             else:
-                if item[2] == atom:
+                _, _, atom = item
+                if atom in atoms:
+                    removed_atoms.add(atom)
                     continue
                 items.append(item)
 
@@ -47,13 +52,23 @@ class MultiQueue:
         for item in items:
             heapq.heappush(self._min_heap, item)
 
+        return removed_atoms
+
     def push(self, priority: float, atom: str):
         if atom in self._priority_of:
             if self._priority_of[atom] <= priority:
                 return
-            self._remove_from_min_heap(atom)
+            self._remove_from_min_heap({atom})
         self._priority_of[atom] = priority
         self._push_to_min_heap(priority, atom)
+
+    def drop(self, atoms: List[str]):
+        for atom in atoms:
+            if atom not in self._priority_of:
+                raise IndexError(f'Atom {atom!r} not currently in the queue')
+
+        for removed_atom in self._remove_from_min_heap(set(atoms)):
+            del self._priority_of[removed_atom]
 
     def pop(self):
         try:
@@ -112,6 +127,12 @@ def file_based_interprocess_locking(lock_filename):
                 os.remove(lock_filename)
 
 
+def run_drop(config):
+    muq = MultiQueue.load(config.state_filename)
+    muq.drop(config.atoms)
+    muq.save(config.state_filename)
+
+
 def run_push(config):
     muq = MultiQueue.load(config.state_filename)
     for atom in config.atoms:
@@ -142,6 +163,7 @@ def run_show(config):
 
 def run(config):
     run_function = {
+        'drop': run_drop,
         'pop': run_pop,
         'push': run_push,
         'show': run_show,
@@ -174,6 +196,12 @@ def parse_command_line(argv):
                               metavar='ATOM',
                               nargs='+',
                               help=f'package atom to push (format "{ATOM_LIKE_DISPLAY}")')
+
+    drop_command = subparsers.add_parser('drop', description='Drop atoms from the queue')
+    drop_command.add_argument('atoms',
+                              metavar='ATOM',
+                              nargs='+',
+                              help=f'package atom to drop (format "{ATOM_LIKE_DISPLAY}")')
 
     subparsers.add_parser('pop', description='Pop atoms from the queue (respecting priority)')
 
