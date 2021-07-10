@@ -23,7 +23,7 @@ def parse_command_line(argv):
                         help='run in non-interactive mode without a TTY')
 
     parser.add_argument('--docker-image',
-                        default='gentoo/stage3-amd64',
+                        default='gentoo/stage3',
                         metavar='IMAGE',
                         help='use Docker image IMAGE (default: "%(default)s")')
 
