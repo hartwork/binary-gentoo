@@ -140,10 +140,6 @@ For the example above, I ended up with these values for the producer machine:
 - All code in **binary-gentoo** must work on a non-Gentoo Linux machine,
   provided that it has Docker installed and working internet access.
 
-- If dependency problems block a package from being built,
-  there should be a log showing that problem.
-  Hence the dedicated round of `emerge --pretend [..]` before the actual build.
-
 - Big packages like Chromium need a pile of RAM and CPU time.
   Therefore, the build defaults to `MAKETOPTS=-j1`
   the package of interest is emerged separate from it dependencies.

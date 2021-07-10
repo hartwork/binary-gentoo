@@ -20,6 +20,9 @@ if __name__ == '__main__':
         setup_requires=[
             'setuptools>=38.6.0',  # for long_description_content_type
         ],
+        install_requires=[
+            'PyYAML',
+        ],
         packages=find_packages(),
         entry_points={
             'console_scripts': [
