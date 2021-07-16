@@ -17,7 +17,10 @@ import yaml
 
 from ..atoms import ATOM_LIKE_DISPLAY, extract_category_package_from
 from ..reporter import announce_and_call, announce_and_check_output, exception_reporting
-from ..version import VERSION_STR
+from ._enrich import enrich_host_distdir_of, enrich_host_pkgdir_of, enrich_host_portdir_of
+from ._parser import (add_distdir_argument_to, add_docker_image_argument_to,
+                      add_interactive_argument_to, add_pkgdir_argument_to, add_portdir_argument_to,
+                      add_version_argument_to)
 
 
 def determine_host_gentoo_profile():
@@ -29,18 +32,9 @@ def enrich_config(config):
     if config.gentoo_profile is None:
         config.gentoo_profile = determine_host_gentoo_profile()
 
-    if config.host_distdir is None:
-        config.host_distdir = announce_and_check_output(['portageq', 'distdir']).rstrip()
-    config.host_distdir = os.path.realpath(config.host_distdir)
-
-    if config.host_portdir is None:
-        config.host_portdir = announce_and_check_output(
-            ['portageq', 'get_repo_path', '/', 'gentoo']).rstrip()
-    config.host_portdir = os.path.realpath(config.host_portdir)
-
-    if config.host_pkgdir is None:
-        config.host_pkgdir = announce_and_check_output(['portageq', 'pkgdir']).rstrip()
-    config.host_pkgdir = os.path.realpath(config.host_pkgdir)
+    enrich_host_distdir_of(config)
+    enrich_host_portdir_of(config)
+    enrich_host_pkgdir_of(config)
 
     config.host_logdir = os.path.realpath(config.host_logdir)
     config.host_etc_portage = os.path.realpath(config.host_etc_portage)
@@ -67,18 +61,11 @@ def parse_command_line(argv):
     parser = ArgumentParser(prog='gentoo-package-build',
                             description='Builds a Gentoo package with Docker isolation')
 
-    parser.add_argument('--version', action='version', version=f'%(prog)s {VERSION_STR}')
+    add_version_argument_to(parser)
 
-    parser.add_argument('--non-interactive',
-                        dest='interactive',
-                        default=True,
-                        action='store_false',
-                        help='run in non-interactive mode without a TTY')
+    add_interactive_argument_to(parser)
 
-    parser.add_argument('--docker-image',
-                        default='gentoo/stage3',
-                        metavar='IMAGE',
-                        help='use Docker image IMAGE (default: "%(default)s")')
+    add_docker_image_argument_to(parser)
 
     parser.add_argument(
         '--gentoo-profile',
@@ -105,26 +92,10 @@ def parse_command_line(argv):
         help=
         'enforce custom CPU_FLAGS_X86 (default: auto-detect using portageq (not cpuid2cpuflags))')
 
-    parser.add_argument(
-        '--portdir',
-        dest='host_portdir',
-        metavar='DIR',
-        help=(
-            'enforce specific location for PORTDIR'
-            ' (e.g. "/var/db/repos/gentoo" or "/usr/portage", default: auto-detect using portageq)'
-        ))
-    parser.add_argument('--pkgdir',
-                        dest='host_pkgdir',
-                        metavar='DIR',
-                        help='enforce specific location for PKGDIR'
-                        ' (e.g. "/var/cache/binpkgs" or "/usr/portage/packages", '
-                        'default: auto-detect using portageq)')
-    parser.add_argument('--distdir',
-                        dest='host_distdir',
-                        metavar='DIR',
-                        help='enforce specific location for DISTDIR'
-                        ' (e.g. "/var/cache/distfiles" or "/usr/portage/distfiles", '
-                        'default: auto-detect using portageq)')
+    add_portdir_argument_to(parser)
+    add_pkgdir_argument_to(parser)
+    add_distdir_argument_to(parser)
+
     parser.add_argument(
         '--logdir',
         dest='host_logdir',

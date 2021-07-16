@@ -12,7 +12,7 @@ from typing import List, Set
 
 from ..atoms import ATOM_LIKE_DISPLAY
 from ..reporter import exception_reporting
-from ..version import VERSION_STR
+from ._parser import add_version_argument_to
 
 
 def _dump_json_for_humans(obj, fp):
@@ -177,7 +177,7 @@ def parse_command_line(argv):
     parser = ArgumentParser(prog='gentoo-local-queue',
                             description='Manages simple file-based push/pop build task queues')
 
-    parser.add_argument('--version', action='version', version=f'%(prog)s {VERSION_STR}')
+    add_version_argument_to(parser)
 
     parser.add_argument('--state',
                         metavar='FILENAME',
