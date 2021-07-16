@@ -65,6 +65,7 @@ jobs:
         run: |-
           set -x
 
+          gentoo-clean --version
           gentoo-local-queue --version
           gentoo-package-build --version
           gentoo-tree-diff --version
