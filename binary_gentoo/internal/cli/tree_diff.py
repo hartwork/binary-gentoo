@@ -7,7 +7,7 @@ import sys
 from argparse import ArgumentParser
 
 from ..reporter import exception_reporting
-from ..version import VERSION_STR
+from ._parser import add_version_argument_to
 
 
 def report_new_and_changed_ebuilds(config):
@@ -37,7 +37,7 @@ def parse_command_line(argv):
         prog='gentoo-tree-diff',
         description='Lists packages/versions/revisions that one portdir has over another')
 
-    parser.add_argument('--version', action='version', version=f'%(prog)s {VERSION_STR}')
+    add_version_argument_to(parser)
 
     parser.add_argument('old_portdir', metavar='OLD', help='location of old portdir')
     parser.add_argument('new_portdir', metavar='NEW', help='location of new portdir')

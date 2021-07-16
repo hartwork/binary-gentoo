@@ -7,26 +7,22 @@ import sys
 from argparse import ArgumentParser
 
 from ..reporter import announce_and_call, exception_reporting
-from ..version import VERSION_STR
+from ._parser import (add_docker_image_argument_to, add_interactive_argument_to,
+                      add_version_argument_to)
 
 
 def parse_command_line(argv):
     parser = ArgumentParser(prog='gentoo-tree-sync',
                             description='Brings a given portdir up to date')
 
-    parser.add_argument('--version', action='version', version=f'%(prog)s {VERSION_STR}')
+    add_version_argument_to(parser)
 
-    parser.add_argument('--non-interactive',
-                        dest='interactive',
-                        default=True,
-                        action='store_false',
-                        help='run in non-interactive mode without a TTY')
+    add_interactive_argument_to(parser)
 
-    parser.add_argument('--docker-image',
-                        default='gentoo/stage3',
-                        metavar='IMAGE',
-                        help='use Docker image IMAGE (default: "%(default)s")')
+    add_docker_image_argument_to(parser)
 
+    # NOTE: Unlike enrich_host_portdir_of(..), this variant does not do auto-detection
+    #       based on portageq
     parser.add_argument('host_portdir',
                         metavar='DIR',
                         help=('location for PORTDIR'
