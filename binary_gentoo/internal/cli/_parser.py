@@ -16,9 +16,9 @@ def add_interactive_argument_to(parser):
                         help='run in non-interactive mode without a TTY')
 
 
-def add_docker_image_argument_to(parser):
+def add_docker_image_argument_to(parser, default='gentoo/stage3'):
     parser.add_argument('--docker-image',
-                        default='gentoo/stage3',
+                        default=default,
                         metavar='IMAGE',
                         help='use Docker image IMAGE (default: "%(default)s")')
 

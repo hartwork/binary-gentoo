@@ -7,8 +7,9 @@ from argparse import ArgumentParser
 
 from ..reporter import announce_and_call, exception_reporting
 from ._enrich import enrich_host_distdir_of, enrich_host_pkgdir_of, enrich_host_portdir_of
-from ._parser import (add_distdir_argument_to, add_interactive_argument_to, add_pkgdir_argument_to,
-                      add_portdir_argument_to, add_version_argument_to)
+from ._parser import (add_distdir_argument_to, add_docker_image_argument_to,
+                      add_interactive_argument_to, add_pkgdir_argument_to, add_portdir_argument_to,
+                      add_version_argument_to)
 
 
 def parse_command_line(argv):
@@ -25,15 +26,7 @@ def parse_command_line(argv):
 
     add_interactive_argument_to(parser)
 
-    # NOTE: Unlike add_docker_image_argument_to(..), this variant makes the
-    #       argument mandatory, has different help text and needs a different
-    #       image, as well
-    parser.add_argument('--docker-image',
-                        required=True,
-                        metavar='IMAGE',
-                        help='use Docker image IMAGE'
-                        ' (needs package "app-portage/gentoolkit" installed '
-                        'for command "eclean")')
+    add_docker_image_argument_to(parser, default='hartwork/gentoo-stage3-plus-gentoolkit')
 
     eclean_pkg_group = parser.add_argument_group('arguments forwarded to eclean')
 
