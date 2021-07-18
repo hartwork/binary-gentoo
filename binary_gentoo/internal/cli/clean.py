@@ -29,7 +29,7 @@ def parse_command_line(argv):
     #       argument mandatory, has different help text and needs a different
     #       image, as well
     parser.add_argument('--docker-image',
-                        required=True,
+                        default='hartwork/gentoo-stage3-plus-gentoolkit',
                         metavar='IMAGE',
                         help='use Docker image IMAGE'
                         ' (needs package "app-portage/gentoolkit" installed '
