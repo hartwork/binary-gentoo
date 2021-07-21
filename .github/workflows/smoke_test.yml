@@ -68,6 +68,7 @@ jobs:
           gentoo-clean --version
           gentoo-local-queue --version
           gentoo-package-build --version
+          gentoo-packages --version
           gentoo-tree-diff --version
           gentoo-tree-sync --version
 
