@@ -65,9 +65,9 @@ jobs:
         run: |-
           set -x
 
+          gentoo-build --version
           gentoo-clean --version
           gentoo-local-queue --version
-          gentoo-package-build --version
           gentoo-packages --version
           gentoo-tree-diff --version
           gentoo-tree-sync --version
@@ -77,7 +77,7 @@ jobs:
 
           gentoo-tree-sync --non-interactive portdir/
 
-          gentoo-package-build \
+          gentoo-build \
               --non-interactive \
               --gentoo-profile default/linux/amd64/17.1/developer \
               --cflags '-O0 -pipe' \
