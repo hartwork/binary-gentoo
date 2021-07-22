@@ -22,7 +22,9 @@ that follow the [Unix philosophy](https://en.wikipedia.org/wiki/Unix_philosophy)
 and are meant to be combined using a glue language like Bash:
 
 - `gentoo-build` – Builds a Gentoo package with Docker isolation
+- `gentoo-clean` — Do operations on pkgdir (other than `emaint --fix binhost`)
 - `gentoo-local-queue` – Manages simple file-based push/pop build task queues
+- `gentoo-packages` — Clean Gentoo pkgdir/distdir files using `eclean` of `app-portage/gentoolkit` with Docker isolation
 - `gentoo-tree-diff` – Lists packages/versions/revisions that one portdir has over another
 - `gentoo-tree-sync` – Brings a given portdir directory up to date
 
@@ -78,6 +80,7 @@ a virtual machine with…
     and then let's `gentoo-build` do a build
   - loops forever
   - sleeps every now and then
+  - runs `gentoo-clean` every now and then
 
 
 ## Determining Ideal Build Flags
