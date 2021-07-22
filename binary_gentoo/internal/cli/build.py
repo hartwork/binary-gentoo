@@ -58,7 +58,7 @@ def enrich_config(config):
 
 
 def parse_command_line(argv):
-    parser = ArgumentParser(prog='gentoo-package-build',
+    parser = ArgumentParser(prog='gentoo-build',
                             description='Builds a Gentoo package with Docker isolation')
 
     add_version_argument_to(parser)
