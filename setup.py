@@ -26,9 +26,9 @@ if __name__ == '__main__':
         packages=find_packages(),
         entry_points={
             'console_scripts': [
-                'gentoo-local-queue = binary_gentoo.internal.cli.local_queue:main',
-                'gentoo-package-build = binary_gentoo.internal.cli.build_package:main',
+                'gentoo-build = binary_gentoo.internal.cli.build:main',
                 'gentoo-clean = binary_gentoo.internal.cli.clean:main',
+                'gentoo-local-queue = binary_gentoo.internal.cli.local_queue:main',
                 'gentoo-packages = binary_gentoo.internal.cli.packages:main',
                 'gentoo-tree-diff = binary_gentoo.internal.cli.tree_diff:main',
                 'gentoo-tree-sync = binary_gentoo.internal.cli.tree_sync:main',
