@@ -1,6 +1,7 @@
 # Copyright (C) 2021 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under GNU Affero GPL version 3 or later
 
+import datetime
 import os
 import re
 import sys
@@ -94,6 +95,20 @@ def run_delete(config):
     print(f'{len(packages_to_delete)} of {len(packages_blocks)} package(s) dropped')
 
 
+def run_list(config):
+    _header, packages_blocks, _packages_index_filename = read_packages_index_file(config)
+
+    packages = []
+    for package_block in packages_blocks:
+        if not package_block:
+            continue
+        packages.append(parse_package_block(package_block))
+
+    for package in sorted(packages, key=lambda p: (p.build_time, p.full_name)):
+        build_datetime = datetime.datetime.fromtimestamp(package.build_time)
+        print(f'[{build_datetime}] {package.full_name}')
+
+
 def parse_command_line(argv):
     parser = ArgumentParser(prog='gentoo-packages',
                             description='Do operations on pkgdir'
@@ -118,6 +133,9 @@ def parse_command_line(argv):
                                 help='only display what would be cleaned '
                                 '(default: delete files)')
     delete_command.set_defaults(command_func=run_delete)
+
+    list_command = subcommands.add_parser('list', help='list packages in chronological order')
+    list_command.set_defaults(command_func=run_list)
 
     return parser.parse_args(argv[1:])
 
