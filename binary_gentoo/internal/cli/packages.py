@@ -46,7 +46,7 @@ def has_safe_package_path(package):
             and 2 <= len(package.path.split('/')) <= 3)
 
 
-def run(config):
+def run_delete(config):
     packages_index_filename = os.path.join(config.host_pkgdir, 'Packages')
 
     with open(packages_index_filename) as f:
@@ -96,23 +96,22 @@ def parse_command_line(argv):
     add_version_argument_to(parser)
     add_pkgdir_argument_to(parser)
 
-    parser.add_argument('--metadata',
-                        metavar='REGEX',
-                        help='limit operation to all packages '
-                        'where any metadata line matches '
-                        'pattern REGEX (e.g. "CPV: virtual/.+")')
-    parser.add_argument('--pretend',
-                        default=False,
-                        action='store_true',
-                        help='only display what would be cleaned '
-                        '(default: delete files)')
+    subcommands = parser.add_subparsers(title='subcommands')
 
-    commands_group = parser.add_argument_group('commands')
-    commands_group.add_argument('--delete',
+    delete_command = subcommands.add_parser('delete',
+                                            help='drop package entries and '
+                                            'delete their respective .xpak/.tbz2 files')
+    delete_command.add_argument('--metadata',
+                                metavar='REGEX',
+                                help='limit operation to all packages '
+                                'where any metadata line matches '
+                                'pattern REGEX (e.g. "CPV: virtual/.+")')
+    delete_command.add_argument('--pretend',
+                                default=False,
                                 action='store_true',
-                                required='True',
-                                help='drop package entries and '
-                                'delete their respective .xpak/.tbz2 files')
+                                help='only display what would be cleaned '
+                                '(default: delete files)')
+    delete_command.set_defaults(command_func=run_delete)
 
     return parser.parse_args(argv[1:])
 
@@ -125,7 +124,7 @@ def main():
     with exception_reporting():
         config = parse_command_line(sys.argv)
         enrich_config(config)
-        run(config)
+        config.command_func(config)
 
 
 if __name__ == '__main__':
