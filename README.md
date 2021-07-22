@@ -21,8 +21,8 @@ There currently four CLI tools
 that follow the [Unix philosophy](https://en.wikipedia.org/wiki/Unix_philosophy)
 and are meant to be combined using a glue language like Bash:
 
+- `gentoo-build` – Builds a Gentoo package with Docker isolation
 - `gentoo-local-queue` – Manages simple file-based push/pop build task queues
-- `gentoo-package-build` – Builds a Gentoo package with Docker isolation
 - `gentoo-tree-diff` – Lists packages/versions/revisions that one portdir has over another
 - `gentoo-tree-sync` – Brings a given portdir directory up to date
 
@@ -75,7 +75,7 @@ a virtual machine with…
   - pushes `gentoo-tree-diff` news onto the queue
   - pops off the queue,
     extracts the atom using e.g. `jq -r .atom`,
-    and then let's `gentoo-package-build` do a build
+    and then let's `gentoo-build` do a build
   - loops forever
   - sleeps every now and then
 
