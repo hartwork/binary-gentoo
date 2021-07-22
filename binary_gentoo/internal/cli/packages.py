@@ -46,13 +46,17 @@ def has_safe_package_path(package):
             and 2 <= len(package.path.split('/')) <= 3)
 
 
-def run_delete(config):
+def read_packages_index_file(config):
     packages_index_filename = os.path.join(config.host_pkgdir, 'Packages')
-
     with open(packages_index_filename) as f:
         content = f.read()
     blocks = content.split('\n\n')
     header, *packages_blocks = blocks
+    return header, packages_blocks, packages_index_filename
+
+
+def run_delete(config):
+    header, packages_blocks, packages_index_filename = read_packages_index_file(config)
 
     matcher = (re.compile(config.metadata, flags=re.MULTILINE) if config.metadata else Mock(
         search=Mock(return_value=True)))
