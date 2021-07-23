@@ -92,8 +92,8 @@ def run_delete(config):
     for package_block in packages_blocks:
         if not package_block:
             empty_block_count += 1
-            continue
-        target = packages_to_delete if matcher.search(package_block) else packages_to_keep
+        target = packages_to_delete if (package_block
+                                        and matcher.search(package_block)) else packages_to_keep
         target.append(package_block)
     actual_packages_count = len(packages_blocks) - empty_block_count
 
