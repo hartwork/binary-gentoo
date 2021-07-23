@@ -66,10 +66,14 @@ def run_delete(config):
     packages_to_keep = []
     packages_to_delete = []
 
+    empty_block_count = 0
     for package_block in packages_blocks:
-        target = packages_to_delete if (package_block
-                                        and matcher.search(package_block)) else packages_to_keep
+        if not package_block:
+            empty_block_count += 1
+            continue
+        target = packages_to_delete if matcher.search(package_block) else packages_to_keep
         target.append(package_block)
+    actual_packages_count = len(packages_blocks) - empty_block_count
 
     for package_block in packages_to_delete:
         package = parse_package_block(package_block)
@@ -92,7 +96,7 @@ def run_delete(config):
             content = '\n\n'.join([header] + packages_to_keep)
             f.write(content)
 
-    print(f'{len(packages_to_delete)} of {len(packages_blocks)} package(s) dropped')
+    print(f'{len(packages_to_delete)} of {actual_packages_count} package(s) dropped')
 
 
 def run_list(config):
