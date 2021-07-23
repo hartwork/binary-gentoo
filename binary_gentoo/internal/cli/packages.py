@@ -5,6 +5,7 @@ import datetime
 import os
 import re
 import sys
+import time
 from argparse import ArgumentParser
 from contextlib import suppress
 from dataclasses import dataclass
@@ -42,6 +43,27 @@ def parse_package_block(package_block: str) -> BinaryPackage:
         cpv=d['CPV'],
         path=d.get('PATH', f'{d["CPV"]}.tbz2'),  # for FEATURES=-binpkg-multi-instance
     )
+
+
+def adjust_index_file_header(old_header: str, new_package_count: int,
+                             new_modification_timestamp: int) -> str:
+    timestamp_pattern = 'TIMESTAMP: ([0-9]+)\n'
+    old_modification_timestamp = int(re.search(timestamp_pattern, old_header).group(1))
+
+    # Make sure we're always monotonically increasing the timestamp
+    if new_modification_timestamp <= old_modification_timestamp:
+        new_modification_timestamp = old_modification_timestamp + 1
+
+    new_header = re.sub('PACKAGES: [0-9]+\n',
+                        f'PACKAGES: {new_package_count}\n',
+                        old_header,
+                        flags=re.MULTILINE)
+    new_header = re.sub(timestamp_pattern,
+                        f'TIMESTAMP: {new_modification_timestamp}\n',
+                        new_header,
+                        flags=re.MULTILINE)
+
+    return new_header
 
 
 def has_safe_package_path(package):
@@ -90,6 +112,11 @@ def run_delete(config):
                         os.rmdir(abs_path_category_dir)
         else:
             print(f'Dropping entry {package.full_name!r} BUT SKIPPING file {package.path!r}...')
+
+    now_seconds_since_epoch = int(time.time())
+    header = adjust_index_file_header(header,
+                                      new_package_count=len(packages_to_keep),
+                                      new_modification_timestamp=now_seconds_since_epoch)
 
     if not config.pretend:
         with open(packages_index_filename, 'w') as f:
