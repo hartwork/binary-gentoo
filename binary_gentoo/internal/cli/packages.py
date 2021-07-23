@@ -92,8 +92,8 @@ def run_delete(config):
     for package_block in packages_blocks:
         if not package_block:
             empty_block_count += 1
-            continue
-        target = packages_to_delete if matcher.search(package_block) else packages_to_keep
+        target = packages_to_delete if (package_block
+                                        and matcher.search(package_block)) else packages_to_keep
         target.append(package_block)
     actual_packages_count = len(packages_blocks) - empty_block_count
 
@@ -137,7 +137,10 @@ def run_list(config):
 
     for package in sorted(packages, key=lambda p: (p.build_time, p.full_name)):
         build_datetime = datetime.datetime.fromtimestamp(package.build_time)
-        print(f'[{build_datetime}] {package.full_name}')
+        if config.atoms:
+            print(f'={package.cpv}')
+        else:
+            print(f'[{build_datetime}] {package.full_name}')
 
 
 def parse_command_line(argv):
@@ -166,6 +169,12 @@ def parse_command_line(argv):
     delete_command.set_defaults(command_func=run_delete)
 
     list_command = subcommands.add_parser('list', help='list packages in chronological order')
+    list_command.add_argument('--atoms',
+                              default=False,
+                              action='store_true',
+                              help='display "=<category>/<package>-<version>-<revision>" '
+                              'style atoms instead '
+                              '(default: display build timestamp, CPVs and build IDs)')
     list_command.set_defaults(command_func=run_list)
 
     return parser.parse_args(argv[1:])
