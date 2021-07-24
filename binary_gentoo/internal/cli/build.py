@@ -57,10 +57,7 @@ def enrich_config(config):
     return config
 
 
-def parse_command_line(argv):
-    parser = ArgumentParser(prog='gentoo-build',
-                            description='Builds a Gentoo package with Docker isolation')
-
+def add_build_arguments_to(parser):
     add_version_argument_to(parser)
 
     add_interactive_argument_to(parser)
@@ -125,14 +122,34 @@ def parse_command_line(argv):
                         action='store_true',
                         help='enforce installation (default: build but do not install)')
 
+    parser.add_argument('--use',
+                        dest='use',
+                        default='',
+                        help='custom one-off use flags (default: none)')
+
+    parser.add_argument('--update',
+                        dest='update',
+                        default=False,
+                        action='store_true',
+                        help='do an emerge --update (default: False)')
+
     parser.add_argument('atom',
                         metavar='ATOM',
                         help=f'Package atom (format "{ATOM_LIKE_DISPLAY}")')
 
+    return parser
+
+
+def parse_command_line(argv):
+    parser = ArgumentParser(prog='gentoo-build',
+                            description='Builds a Gentoo package with Docker isolation')
+
+    parser = add_build_arguments_to(parser)
+
     return parser.parse_args(argv[1:])
 
 
-def build(config):
+def build(config, container_name=None):
     cpu_threads_to_use = max(1, len(os.sched_getaffinity(0)) + 1)
     container_portdir = '/usr/portage'
     container_logdir = '/var/log/portage/'
@@ -148,6 +165,15 @@ def build(config):
         '--with-bdeps=y',
         '--complete-graph',
     ]
+
+    if config.update:
+        emerge_args += [
+            '--update',
+            '--changed-use',
+            '--newuse',
+            '--deep',
+        ]
+
     features_flat = ' '.join([
         '-news',
         'binpkg-multi-instance',
@@ -174,6 +200,7 @@ def build(config):
         f'CFLAGS={shlex.quote(config.cflags)}',
         f'CXXFLAGS={shlex.quote(config.cxxflags)}',
         f'LDFLAGS={shlex.quote(config.ldflags)}',
+        f'USE={shlex.quote(config.use)}'
     ]
 
     emerge = ['env'] + emerge_env + ['emerge'] + emerge_args
@@ -276,10 +303,22 @@ def build(config):
                     f'{emerge_quoted_flat} {rebuild_or_not} {install_or_not} {shlex.quote(config.atom)}',  # noqa: E501
                 ]
 
+            # Cleanup previous steps
+            step_commands += [
+                'rm /var/db/repos/gentoo',
+                'rm /etc/make.profile',
+            ]
+
             container_command_flat = ' && '.join(step_commands)
 
+            if container_name is None:
+                docker_container_lifecycle_arg = '--rm'
+            else:
+                # TODO there should be some sanity checks on the container name
+                docker_container_lifecycle_arg = f'--name={container_name}'
+
             docker_run_args = [
-                '--rm',
+                docker_container_lifecycle_arg,
                 '-v',
                 f'{eventual_etc_portage}:/etc/portage:rw',
                 '-v',
