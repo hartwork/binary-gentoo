@@ -154,24 +154,30 @@ def build(config, container_name=None):
     container_portdir = '/usr/portage'
     container_logdir = '/var/log/portage/'
 
-    emerge_args = [
-        '--oneshot',
-        '--verbose',
-        '--tree',
-        '--jobs=2',
-        f'--load-average={cpu_threads_to_use}',
-        '--buildpkg=y',
-        '--keep-going',
-        '--with-bdeps=y',
-        '--complete-graph',
-    ]
-
     if config.update:
-        emerge_args += [
+        emerge_args = [
+            '--oneshot',
+            '--verbose',
+            '--tree',
+            '--jobs=2',
+            f'--load-average={cpu_threads_to_use}',
+            '--buildpkg=y',
             '--update',
             '--changed-use',
             '--newuse',
             '--deep',
+        ]
+    else:
+        emerge_args = [
+            '--oneshot',
+            '--verbose',
+            '--tree',
+            '--jobs=2',
+            f'--load-average={cpu_threads_to_use}',
+            '--buildpkg=y',
+            '--keep-going',
+            '--with-bdeps=y',
+            '--complete-graph',
         ]
 
     features_flat = ' '.join([
@@ -298,8 +304,11 @@ def build(config, container_name=None):
 
                 install_or_not = ('' if (config.enforce_installation or not is_last_step) else
                                   '--buildpkgonly')
+                if not config.update:
+                    step_commands += [
+                        f'{emerge_quoted_flat} --usepkg=y --onlydeps --verbose-conflicts {shlex.quote(config.atom)}',  # noqa: E501
+                    ]
                 step_commands += [
-                    f'{emerge_quoted_flat} --usepkg=y --onlydeps --verbose-conflicts {shlex.quote(config.atom)}',  # noqa: E501
                     f'{emerge_quoted_flat} {rebuild_or_not} {install_or_not} {shlex.quote(config.atom)}',  # noqa: E501
                 ]
 
