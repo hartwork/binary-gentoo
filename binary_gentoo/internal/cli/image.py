@@ -22,6 +22,7 @@ def parse_command_line(argv):
 
 def create_image(config):
     config.enforce_installation = True
+    config.enforce_rebuild = False
     container_name = f'gentoo-build-host-{uuid.uuid4().hex}'
     build(config, container_name)
 
