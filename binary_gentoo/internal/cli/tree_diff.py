@@ -10,7 +10,7 @@ from ..reporter import exception_reporting
 from ._parser import add_version_argument_to
 
 
-def report_new_and_changed_ebuilds(config):
+def iterate_new_and_changed_ebuilds(config):
     for root, dirs, files in os.walk(config.new_portdir):
         ebuild_files = [f for f in files if f.endswith('.ebuild')]
         if not ebuild_files:
@@ -28,8 +28,12 @@ def report_new_and_changed_ebuilds(config):
                     continue
 
             version = ebuild_file[len(package + '-'):-len('.ebuild')]
-            category_plus_package_plus_version = f'{category_plus_package}-{version}'
-            print(category_plus_package_plus_version)
+            yield f'{category_plus_package}-{version}'
+
+
+def report_new_and_changed_ebuilds(config):
+    for cpv in iterate_new_and_changed_ebuilds(config):
+        print(cpv)
 
 
 def parse_command_line(argv):
