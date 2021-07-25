@@ -23,6 +23,10 @@ if __name__ == '__main__':
         install_requires=[
             'PyYAML',
         ],
+        tests_require=[
+            'mock',
+            'parameterized',
+        ],
         packages=find_packages(),
         entry_points={
             'console_scripts': [

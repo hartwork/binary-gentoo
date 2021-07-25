@@ -3,8 +3,11 @@
 
 from textwrap import dedent
 from unittest import TestCase
+from unittest.mock import Mock
 
-from ..packages import adjust_index_file_header, parse_package_block
+from parameterized import parameterized
+
+from ..packages import adjust_index_file_header, has_safe_package_path, parse_package_block
 
 
 class ParsePackageBlockTest(TestCase):
@@ -70,3 +73,16 @@ class AdjustIndexFileHeaderTest(TestCase):
             new_package_count=new_package_count,
             new_modification_timestamp=new_modification_timestamp)
         self.assertEqual(actual_header, expected_header)
+
+
+class HasSafePackagePathTest(TestCase):
+    @parameterized.expand([
+        ('cat/pkg/pkg-123-1.xpak', True, 'healthy .xpak'),
+        ('cat/pkg-123.tbz2', True, 'healthy .tbz2'),
+        ('../pkg-123.tbz2', False, 'bad ..'),
+        ('/cat/pkg-123.tbz2', False, 'bad leading slash'),
+    ])
+    def test(self, candidate_path, expected_is_safe, _comment):
+        package_mock = Mock(path=candidate_path)
+        actual_is_safe = has_safe_package_path(package_mock)
+        self.assertEqual(actual_is_safe, expected_is_safe)
