@@ -111,9 +111,10 @@ def run_delete(config):
         else:
             print(f'Dropping entry {package.full_name!r} BUT SKIPPING file {package.path!r}...')
 
+    new_package_count = len(packages_to_keep) - empty_block_count
     now_seconds_since_epoch = int(time.time())
     header = adjust_index_file_header(header,
-                                      new_package_count=len(packages_to_keep),
+                                      new_package_count=new_package_count,
                                       new_modification_timestamp=now_seconds_since_epoch)
 
     if not config.pretend:
