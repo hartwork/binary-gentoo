@@ -5,12 +5,12 @@ import os
 from tempfile import TemporaryDirectory
 from textwrap import dedent
 from unittest import TestCase
-from unittest.mock import Mock
+from unittest.mock import Mock, patch
 
 from parameterized import parameterized
 
 from ..packages import (adjust_index_file_header, has_safe_package_path, parse_package_block,
-                        read_packages_index_file)
+                        read_packages_index_file, run_delete)
 
 
 class ParsePackageBlockTest(TestCase):
@@ -109,3 +109,75 @@ class ReadPackagesIndexFileTest(TestCase):
         self.assertEqual(actual_header, expected_header)
         self.assertEqual(actual_packages_blocks, expected_packages_blocks)
         self.assertEqual(actual_packages_index_filename, expected_packages_index_filename)
+
+
+class RunDeleteTest(TestCase):
+    @staticmethod
+    def _create_empty_file(filename):
+        os.makedirs(os.path.dirname(filename))
+        with open(filename, 'w'):
+            pass
+
+    @parameterized.expand([
+        ('pretend', True),
+        ('actually delete files', False),
+    ])
+    def test_success(self, _label, pretend):
+        original_dummy_index_content = dedent("""\
+            PACKAGES: 2
+            TIMESTAMP: 123
+            VERSION: 0
+
+            BUILD_ID: 1
+            BUILD_TIME: 1
+            CPV: one/one-1
+
+            BUILD_ID: 2
+            BUILD_TIME: 2
+            CPV: two/two-2
+
+        """)
+        now_epoch_seconds = 456
+        expected_post_deletion_index_content = dedent(f"""\
+            PACKAGES: 1
+            TIMESTAMP: {now_epoch_seconds}
+            VERSION: 0
+
+            BUILD_ID: 2
+            BUILD_TIME: 2
+            CPV: two/two-2
+
+        """)
+
+        with TemporaryDirectory() as tempdir:
+            binary_path_one = os.path.join(tempdir, 'one/one-1.tbz2')
+            binary_path_two = os.path.join(tempdir, 'two/two-2.tbz2')
+
+            with open(os.path.join(tempdir, 'Packages'), 'w') as f:
+                print(original_dummy_index_content, end='', file=f)
+            self._create_empty_file(binary_path_one)
+            self._create_empty_file(binary_path_two)
+
+            # This will delete the first of the two packages
+            config_mock = Mock(
+                host_pkgdir=tempdir,
+                metadata='BUILD_TIME: 1',
+                pretend=pretend,
+            )
+
+            time_mock = Mock(return_value=float(now_epoch_seconds))
+            with patch('time.time', time_mock):
+                run_delete(config_mock)
+
+            with open(os.path.join(tempdir, 'Packages')) as f:
+                actual_post_deletion_index_content = f.read()
+
+            if pretend:
+                self.assertTrue(os.path.exists(binary_path_one))
+                self.assertTrue(os.path.exists(binary_path_two))
+                self.assertEqual(actual_post_deletion_index_content, original_dummy_index_content)
+            else:
+                self.assertFalse(os.path.exists(binary_path_one))
+                self.assertTrue(os.path.exists(binary_path_two))
+                self.assertEqual(actual_post_deletion_index_content,
+                                 expected_post_deletion_index_content)
