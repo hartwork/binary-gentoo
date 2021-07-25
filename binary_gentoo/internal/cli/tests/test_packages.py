@@ -11,7 +11,7 @@ from unittest.mock import Mock, patch
 from freezegun import freeze_time
 from parameterized import parameterized
 
-from ..packages import (adjust_index_file_header, has_safe_package_path, parse_package_block,
+from ..packages import (adjust_index_file_header, has_safe_package_path, main, parse_package_block,
                         read_packages_index_file, run_delete, run_list)
 
 
@@ -227,3 +227,24 @@ class RunListTest(TestCase):
 
             actual_stdout__atoms = self._run_list_with_config(config_mock)
             self.assertEqual(actual_stdout__atoms, expected_stdout__atoms)
+
+
+class MainTest(TestCase):
+    @parameterized.expand([
+        ('gentoo-packages', '--help'),
+        ('gentoo-packages', 'delete', '--help'),
+        ('gentoo-packages', 'list', '--help'),
+    ])
+    def test_help(self, *argv):  # plain smoke test
+        with patch('sys.argv', argv), patch('sys.stdout', StringIO()) as stdout_mock:
+            with self.assertRaises(SystemExit) as catcher:
+                main()
+            self.assertEqual(catcher.exception.args, (0, ))  # i.e. success
+            self.assertIn('optional arguments:', stdout_mock.getvalue())
+
+    def test_list_failure_empty_directory(self):  # just something that touches beyond argparse
+        with TemporaryDirectory() as tempdir:
+            argv = ['gentoo-packages', '--pkgdir', tempdir, 'list']
+            with patch('sys.argv', argv), self.assertRaises(SystemExit) as catcher:
+                main()
+            self.assertEqual(catcher.exception.args, (1, ))  # i.e. error
