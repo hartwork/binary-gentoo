@@ -19,7 +19,6 @@ from ._parser import add_pkgdir_argument_to, add_version_argument_to
 @dataclass
 class BinaryPackage:
     full_name: str
-    build_id: int
     build_time: int
     cpv: str
     path: str
@@ -38,7 +37,6 @@ def parse_package_block(package_block: str) -> BinaryPackage:
 
     return BinaryPackage(
         full_name=f'{d["CPV"]}-{d["BUILD_ID"]}',
-        build_id=d['BUILD_ID'],
         build_time=int(d['BUILD_TIME']),
         cpv=d['CPV'],
         path=d.get('PATH', f'{d["CPV"]}.tbz2'),  # for FEATURES=-binpkg-multi-instance
