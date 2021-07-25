@@ -1,13 +1,16 @@
 # Copyright (C) 2021 Sebastian Pipping <sebastian@pipping.org>
 # Licensed under GNU Affero GPL version 3 or later
 
+import os
+from tempfile import TemporaryDirectory
 from textwrap import dedent
 from unittest import TestCase
 from unittest.mock import Mock
 
 from parameterized import parameterized
 
-from ..packages import adjust_index_file_header, has_safe_package_path, parse_package_block
+from ..packages import (adjust_index_file_header, has_safe_package_path, parse_package_block,
+                        read_packages_index_file)
 
 
 class ParsePackageBlockTest(TestCase):
@@ -86,3 +89,23 @@ class HasSafePackagePathTest(TestCase):
         package_mock = Mock(path=candidate_path)
         actual_is_safe = has_safe_package_path(package_mock)
         self.assertEqual(actual_is_safe, expected_is_safe)
+
+
+class ReadPackagesIndexFileTest(TestCase):
+    def test_success(self):
+        expected_header = 'K1: v1'
+        expected_packages_blocks = ['K2: v2', 'K3: v3', '']
+
+        with TemporaryDirectory() as tempdir:
+            expected_packages_index_filename = os.path.join(tempdir, 'Packages')
+            with open(expected_packages_index_filename, 'w') as f:
+                flat_packages_blocks = "\n\n".join(expected_packages_blocks)
+                print(f'{expected_header}\n\n{flat_packages_blocks}', end='', file=f)
+            config_mock = Mock(host_pkgdir=tempdir)
+
+            actual_header, actual_packages_blocks, actual_packages_index_filename \
+                = read_packages_index_file(config_mock)
+
+        self.assertEqual(actual_header, expected_header)
+        self.assertEqual(actual_packages_blocks, expected_packages_blocks)
+        self.assertEqual(actual_packages_index_filename, expected_packages_index_filename)
