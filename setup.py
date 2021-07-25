@@ -24,6 +24,7 @@ if __name__ == '__main__':
             'PyYAML',
         ],
         tests_require=[
+            'freezegun',
             'mock',
             'parameterized',
         ],

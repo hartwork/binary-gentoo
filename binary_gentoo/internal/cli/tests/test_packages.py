@@ -2,15 +2,17 @@
 # Licensed under GNU Affero GPL version 3 or later
 
 import os
+from io import StringIO
 from tempfile import TemporaryDirectory
 from textwrap import dedent
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
+from freezegun import freeze_time
 from parameterized import parameterized
 
 from ..packages import (adjust_index_file_header, has_safe_package_path, parse_package_block,
-                        read_packages_index_file, run_delete)
+                        read_packages_index_file, run_delete, run_list)
 
 
 class ParsePackageBlockTest(TestCase):
@@ -181,3 +183,47 @@ class RunDeleteTest(TestCase):
                 self.assertTrue(os.path.exists(binary_path_two))
                 self.assertEqual(actual_post_deletion_index_content,
                                  expected_post_deletion_index_content)
+
+
+class RunListTest(TestCase):
+    @staticmethod
+    def _run_list_with_config(config):
+        with patch('sys.stdout', StringIO()) as stdout_mock:
+            run_list(config)
+        return stdout_mock.getvalue()
+
+    def test_success__sorted_by_build_time(self):
+        dummy_index_content = dedent("""\
+            VERSION: 0
+
+            BUILD_ID: 2
+            BUILD_TIME: 2
+            CPV: two/two-2
+
+            BUILD_ID: 1
+            BUILD_TIME: 1
+            CPV: one/one-1
+
+        """)
+        expected_stdout__summary = dedent("""\
+            [1970-01-01 04:00:01] one/one-1-1
+            [1970-01-01 04:00:02] two/two-2-2
+        """)
+        expected_stdout__atoms = dedent("""\
+            =one/one-1
+            =two/two-2
+        """)
+
+        with TemporaryDirectory() as tempdir:
+            config_mock = Mock(atoms=False, host_pkgdir=tempdir)
+            with open(os.path.join(tempdir, 'Packages'), 'w') as f:
+                print(dummy_index_content, end='', file=f)
+
+            with freeze_time(tz_offset=4):
+                actual_stdout__summary = self._run_list_with_config(config_mock)
+            self.assertEqual(actual_stdout__summary, expected_stdout__summary)
+
+            config_mock.atoms = True
+
+            actual_stdout__atoms = self._run_list_with_config(config_mock)
+            self.assertEqual(actual_stdout__atoms, expected_stdout__atoms)
