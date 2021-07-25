@@ -70,12 +70,11 @@ jobs:
           gentoo-local-queue --version
           gentoo-packages --version
           gentoo-tree-diff --version
-          gentoo-tree-sync --version
 
           mkdir etc-portage/
           echo 'ACCEPT_KEYWORDS="~amd64"' > etc-portage/make.conf
 
-          gentoo-tree-sync --non-interactive portdir/
+          git clone --depth 1 https://github.com/gentoo-mirror/gentoo portdir/
 
           gentoo-build \
               --non-interactive \
