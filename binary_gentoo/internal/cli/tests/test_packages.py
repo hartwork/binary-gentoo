@@ -4,7 +4,7 @@
 from textwrap import dedent
 from unittest import TestCase
 
-from ..packages import parse_package_block
+from ..packages import adjust_index_file_header, parse_package_block
 
 
 class ParsePackageBlockTest(TestCase):
@@ -49,3 +49,24 @@ class ParsePackageBlockTest(TestCase):
     def test_missing_path_inferred(self):
         package = parse_package_block(self._DUMMY_PACKAGE_BLOCK_WITH_PATH)
         self.assertEqual(package.path, 'cat/pkg/pkg-123-1.xpak')
+
+
+class AdjustIndexFileHeaderTest(TestCase):
+    def test_replacement(self):
+        original_dummy_header = dedent("""\
+            PACKAGES: 758
+            TIMESTAMP: 1627149542
+            VERSION: 0
+        """)
+        new_package_count = 123
+        new_modification_timestamp = 999999999999999  # some int bigger than current epoch seconds
+        expected_header = dedent(f"""\
+            PACKAGES: {new_package_count}
+            TIMESTAMP: {new_modification_timestamp}
+            VERSION: 0
+        """)
+        actual_header = adjust_index_file_header(
+            old_header=original_dummy_header,
+            new_package_count=new_package_count,
+            new_modification_timestamp=new_modification_timestamp)
+        self.assertEqual(actual_header, expected_header)
