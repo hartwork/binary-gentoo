@@ -33,7 +33,7 @@ is software libre licensed under the `GNU Affero GPL version 3 or later` license
 
 ## Installation
 
-Install Docker, Python >=3.7, pip and rsync and then:
+Install Docker, Python >=3.8, pip and rsync and then:
 
 ```console
 # pip install binary-gentoo
