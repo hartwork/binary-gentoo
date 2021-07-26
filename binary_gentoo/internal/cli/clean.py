@@ -96,7 +96,3 @@ def main():
         config = parse_command_line(sys.argv)
         enrich_config(config)
         clean_packages(config)
-
-
-if __name__ == '__main__':
-    main()
