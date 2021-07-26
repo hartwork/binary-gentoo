@@ -13,17 +13,17 @@ ATOM_LIKE_DISPLAY = '[=]<category>/<package>[-<version>[-r<revision>]]'
 
 
 def extract_category_package_from(atomlike):
-    # first check for regular category and package names
     for pattern in (_atom_cpv_pattern, _cpv_pattern, _cp_pattern):
         match = re.compile(pattern).match(atomlike)
         if match is not None:
             break
     else:
-        # if not found, see if we have a set
-        match = re.compile(_set_pattern).match(atomlike)
-        if match is None:
-            # if still not found, raise an error
-            raise ValueError(f'Not valid "{ATOM_LIKE_DISPLAY}" syntax: {atomlike!r}')
-        else:
-            return 'set', match.group('set')
+        raise ValueError(f'Not valid "{ATOM_LIKE_DISPLAY}" syntax: {atomlike!r}')
     return match.group('category'), match.group('package')
+
+
+def extract_set_from(atomlike):
+    match = re.compile(_set_pattern).match(atomlike)
+    if match is None:
+        raise ValueError(f'Not valid "{ATOM_LIKE_DISPLAY}" syntax: {atomlike!r}')
+    return match.group('set')

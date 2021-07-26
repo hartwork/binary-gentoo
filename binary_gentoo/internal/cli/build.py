@@ -229,7 +229,10 @@ def build(config):
     ]
 
     # Create pretend log dir
-    category, package = extract_category_package_from(config.atom)
+    try:
+        category, package = extract_category_package_from(config.atom)
+    except ValueError:
+        category, package = 'set', extract_category_package_from(config.atom)
     host_pretend_logdir = os.path.join(config.host_logdir, 'binary-gentoo')
     host_pretend_logdir_category = os.path.join(host_pretend_logdir, category)
     host_pretend_logdir_category_package = os.path.join(host_pretend_logdir_category, package)
