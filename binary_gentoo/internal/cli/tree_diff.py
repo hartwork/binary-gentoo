@@ -7,20 +7,23 @@ import re
 import sys
 from argparse import ArgumentParser
 
-from ..reporter import exception_reporting
 from ._parser import add_version_argument_to
+from ..reporter import exception_reporting
 
 keywords_pattern = re.compile('KEYWORDS="(?P<keywords>.*?)"')
+
 
 def _get_relevant_keywords_set_for(ebuild_content, expected_keywords):
     try:
         ebuild_keywords = keywords_pattern.search(ebuild_content).group('keywords')
     except AttributeError:
+        # if the KEYWORDS variable is not found in the ebuild, we will assume the ebuild needs to be listed
         ebuild_keywords = expected_keywords
     expected_keywords_set = set(expected_keywords.split(" "))
     ebuild_keywords_set = set(ebuild_keywords.split(" "))
 
     return expected_keywords_set & ebuild_keywords_set
+
 
 def iterate_new_and_changed_ebuilds(config):
     for root, dirs, files in os.walk(config.new_portdir):
@@ -55,7 +58,8 @@ def iterate_new_and_changed_ebuilds(config):
                         old_ebuild_content = ifile.read()
                     old_ebuild_relevant_keywords = _get_relevant_keywords_set_for(old_ebuild_content, config.keywords)
 
-                    # or if both old and new file include the same keywords (i.e., when other keywords have changed)
+                    # don't output if both old and new file include the same keywords
+                    # (i.e., when only other keywords have changed)
                     if new_ebuild_relevant_keywords == old_ebuild_relevant_keywords:
                         continue
 
@@ -78,7 +82,9 @@ def parse_command_line(argv):
     parser.add_argument('--keywords',
                         dest='keywords',
                         default='',
-                        help='set keywords to look for (default: all keywords')
+                        help='filter the list on these keywords; '
+                             'in case of multiple keywords a space-separated list can be provided '
+                             '(default: all keywords)')
     parser.add_argument('old_portdir', metavar='OLD', help='location of old portdir')
     parser.add_argument('new_portdir', metavar='NEW', help='location of new portdir')
 
