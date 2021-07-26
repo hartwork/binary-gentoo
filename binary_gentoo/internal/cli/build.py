@@ -316,7 +316,3 @@ def main():
         config = parse_command_line(sys.argv)
         enrich_config(config)
         build(config)
-
-
-if __name__ == '__main__':
-    main()

@@ -19,7 +19,6 @@ from ._parser import add_pkgdir_argument_to, add_version_argument_to
 @dataclass
 class BinaryPackage:
     full_name: str
-    build_id: int
     build_time: int
     cpv: str
     path: str
@@ -38,7 +37,6 @@ def parse_package_block(package_block: str) -> BinaryPackage:
 
     return BinaryPackage(
         full_name=f'{d["CPV"]}-{d["BUILD_ID"]}',
-        build_id=d['BUILD_ID'],
         build_time=int(d['BUILD_TIME']),
         cpv=d['CPV'],
         path=d.get('PATH', f'{d["CPV"]}.tbz2'),  # for FEATURES=-binpkg-multi-instance
@@ -95,7 +93,7 @@ def run_delete(config):
         target = packages_to_delete if (package_block
                                         and matcher.search(package_block)) else packages_to_keep
         target.append(package_block)
-    actual_packages_count = len(packages_blocks) - empty_block_count
+    original_package_count = len(packages_blocks) - empty_block_count
 
     for package_block in packages_to_delete:
         package = parse_package_block(package_block)
@@ -113,9 +111,10 @@ def run_delete(config):
         else:
             print(f'Dropping entry {package.full_name!r} BUT SKIPPING file {package.path!r}...')
 
+    new_package_count = len(packages_to_keep) - empty_block_count
     now_seconds_since_epoch = int(time.time())
     header = adjust_index_file_header(header,
-                                      new_package_count=len(packages_to_keep),
+                                      new_package_count=new_package_count,
                                       new_modification_timestamp=now_seconds_since_epoch)
 
     if not config.pretend:
@@ -123,7 +122,7 @@ def run_delete(config):
             content = '\n\n'.join([header] + packages_to_keep)
             f.write(content)
 
-    print(f'{len(packages_to_delete)} of {actual_packages_count} package(s) dropped')
+    print(f'{len(packages_to_delete)} of {original_package_count} package(s) dropped')
 
 
 def run_list(config):
@@ -189,7 +188,3 @@ def main():
         config = parse_command_line(sys.argv)
         enrich_config(config)
         config.command_func(config)
-
-
-if __name__ == '__main__':
-    main()

@@ -1,0 +1,49 @@
+# Copyright (C) 2021 Sebastian Pipping <sebastian@pipping.org>
+# Licensed under GNU Affero GPL version 3 or later
+
+name: Run Python test suite
+
+on:
+  pull_request:
+  push:
+  schedule:
+    - cron: '0 3 * * 5'  # Every Friday at 3am
+
+jobs:
+  build_and_test:
+    strategy:
+      matrix:
+        python-version: [3.8, 3.9]  # oldest and most recent version supported
+    name: Run Python test suite
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v2.3.4
+
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2.2.2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install
+        run: |-
+          set -x
+          python -m venv venv
+          source venv/bin/activate
+          pip install \
+            --disable-pip-version-check \
+            --ignore-installed \
+            pip setuptools wheel
+          pip install \
+            coverage \
+            freezegun \
+            mock \
+            parameterized \
+            pytest
+
+      - name: Run Python test suite
+        run: |-
+          set -x
+          source venv/bin/activate
+          python --version
+          coverage run -m pytest binary_gentoo
+          coverage report
