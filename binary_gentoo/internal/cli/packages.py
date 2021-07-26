@@ -188,7 +188,3 @@ def main():
         config = parse_command_line(sys.argv)
         enrich_config(config)
         config.command_func(config)
-
-
-if __name__ == '__main__':
-    main()

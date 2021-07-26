@@ -58,7 +58,3 @@ def main():
     with exception_reporting():
         config = parse_command_line(sys.argv)
         report_new_and_changed_ebuilds(config)
-
-
-if __name__ == '__main__':
-    main()
