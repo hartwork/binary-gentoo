@@ -16,12 +16,17 @@ if __name__ == '__main__':
         author='Sebastian Pipping',
         author_email='sebastian@pipping.org',
         url='https://github.com/hartwork/binary-gentoo',
-        python_requires='>=3.7',
+        python_requires='>=3.8',
         setup_requires=[
             'setuptools>=38.6.0',  # for long_description_content_type
         ],
         install_requires=[
             'PyYAML',
+        ],
+        tests_require=[
+            'freezegun',
+            'mock',
+            'parameterized',
         ],
         packages=find_packages(),
         entry_points={
@@ -31,13 +36,11 @@ if __name__ == '__main__':
                 'gentoo-local-queue = binary_gentoo.internal.cli.local_queue:main',
                 'gentoo-packages = binary_gentoo.internal.cli.packages:main',
                 'gentoo-tree-diff = binary_gentoo.internal.cli.tree_diff:main',
-                'gentoo-tree-sync = binary_gentoo.internal.cli.tree_sync:main',
             ],
         },
         classifiers=[
             'Programming Language :: Python',
             'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.7',
             'Programming Language :: Python :: 3.8',
             'Programming Language :: Python :: 3.9',
             'Programming Language :: Python :: 3 :: Only',
