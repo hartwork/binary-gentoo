@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import uuid
 from argparse import ArgumentParser
 from contextlib import suppress
 
@@ -57,7 +58,10 @@ def enrich_config(config):
     return config
 
 
-def add_build_arguments_to(parser):
+def parse_command_line(argv):
+    parser = ArgumentParser(prog='gentoo-build',
+                            description='Builds a Gentoo package with Docker isolation')
+
     add_version_argument_to(parser)
 
     add_interactive_argument_to(parser)
@@ -133,23 +137,19 @@ def add_build_arguments_to(parser):
                         action='store_true',
                         help='do an emerge --update (default: False)')
 
+    parser.add_argument('--tag-docker-image',
+                        dest='tag_docker_image',
+                        default='',
+                        help='create an image of the resulting container')
+
     parser.add_argument('atom',
                         metavar='ATOM',
                         help=f'Package atom (format "{ATOM_LIKE_DISPLAY}")')
 
-    return parser
-
-
-def parse_command_line(argv):
-    parser = ArgumentParser(prog='gentoo-build',
-                            description='Builds a Gentoo package with Docker isolation')
-
-    parser = add_build_arguments_to(parser)
-
     return parser.parse_args(argv[1:])
 
 
-def build(config, container_name=None):
+def build(config):
     cpu_threads_to_use = max(1, len(os.sched_getaffinity(0)) + 1)
     container_portdir = '/usr/portage'
     container_logdir = '/var/log/portage/'
@@ -208,6 +208,10 @@ def build(config, container_name=None):
         f'LDFLAGS={shlex.quote(config.ldflags)}',
         f'USE={shlex.quote(config.use)}'
     ]
+
+    if config.tag_docker_image:
+        config.enforce_installation = True
+    container_name = f'gentoo-build-host-{uuid.uuid4().hex}'
 
     emerge = ['env'] + emerge_env + ['emerge'] + emerge_args
     emerge_quoted_flat = ' '.join(emerge)
@@ -320,11 +324,10 @@ def build(config, container_name=None):
 
             container_command_flat = ' && '.join(step_commands)
 
-            if container_name is None:
-                docker_container_lifecycle_arg = '--rm'
-            else:
-                # TODO there should be some sanity checks on the container name
+            if config.tag_docker_image:
                 docker_container_lifecycle_arg = f'--name={container_name}'
+            else:
+                docker_container_lifecycle_arg = '--rm'
 
             docker_run_args = [
                 docker_container_lifecycle_arg,
@@ -354,9 +357,15 @@ def build(config, container_name=None):
                 with suppress(OSError):
                     os.rmdir(host_pretend_logdir_category_package)
                     os.rmdir(host_pretend_logdir_category)
+
+                if config.tag_docker_image:
+                    announce_and_call(['docker', 'commit', container_name, config.tag_docker_image])
             finally:
                 pretend_log_writer_process.stdin.close()
                 pretend_log_writer_process.wait()
+
+                if config.tag_docker_image:
+                    announce_and_call(['docker', 'rm', container_name])
 
 
 def main():

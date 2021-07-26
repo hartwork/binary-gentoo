@@ -27,7 +27,6 @@ if __name__ == '__main__':
         entry_points={
             'console_scripts': [
                 'gentoo-build = binary_gentoo.internal.cli.build:main',
-                'gentoo-image = binary_gentoo.internal.cli.image:main',
                 'gentoo-clean = binary_gentoo.internal.cli.clean:main',
                 'gentoo-local-queue = binary_gentoo.internal.cli.local_queue:main',
                 'gentoo-packages = binary_gentoo.internal.cli.packages:main',
