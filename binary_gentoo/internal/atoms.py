@@ -14,7 +14,7 @@ ATOM_LIKE_DISPLAY = '[=]<category>/<package>[-<version>[-r<revision>]]'
 
 def extract_category_package_from(atomlike):
     # first check for regular category and package names
-    for pattern in (_cp_pattern, _cpv_pattern, _atom_cpv_pattern):
+    for pattern in (_atom_cpv_pattern, _cpv_pattern, _cp_pattern):
         match = re.compile(pattern).match(atomlike)
         if match is not None:
             break
