@@ -3,12 +3,24 @@
 
 import filecmp
 import os
+import re
 import sys
 from argparse import ArgumentParser
 
 from ..reporter import exception_reporting
 from ._parser import add_version_argument_to
 
+keywords_pattern = re.compile('KEYWORDS="(?P<keywords>.*?)"')
+
+def _get_relevant_keywords_set_for(ebuild_content, expected_keywords):
+    try:
+        ebuild_keywords = keywords_pattern.search(ebuild_content).group('keywords')
+    except AttributeError:
+        ebuild_keywords = expected_keywords
+    expected_keywords_set = set(expected_keywords.split(" "))
+    ebuild_keywords_set = set(ebuild_keywords.split(" "))
+
+    return expected_keywords_set & ebuild_keywords_set
 
 def report_new_and_changed_ebuilds(config):
     for root, dirs, files in os.walk(config.new_portdir):
@@ -22,10 +34,30 @@ def report_new_and_changed_ebuilds(config):
         for ebuild_file in ebuild_files:
             old_portdir_ebuild_file = os.path.join(config.old_portdir, category_plus_package,
                                                    ebuild_file)
+            new_portdir_ebuild_file = os.path.join(root, ebuild_file)
+
+            # don't output if files are identical
             if os.path.exists(old_portdir_ebuild_file):
-                new_portdir_ebuild_file = os.path.join(root, ebuild_file)
                 if filecmp.cmp(old_portdir_ebuild_file, new_portdir_ebuild_file):
                     continue
+
+            if config.keywords:
+                with open(new_portdir_ebuild_file, "r") as ifile:
+                    new_ebuild_content = ifile.read()
+                new_ebuild_relevant_keywords = _get_relevant_keywords_set_for(new_ebuild_content, config.keywords)
+
+                # don't output if the new file doesn't include the specified keywords
+                if len(new_ebuild_relevant_keywords) == 0:
+                    continue
+
+                if os.path.exists(old_portdir_ebuild_file):
+                    with open(old_portdir_ebuild_file, "r") as ifile:
+                        old_ebuild_content = ifile.read()
+                    old_ebuild_relevant_keywords = _get_relevant_keywords_set_for(old_ebuild_content, config.keywords)
+
+                    # or if both old and new file include the same keywords (i.e., when other keywords have changed)
+                    if new_ebuild_relevant_keywords == old_ebuild_relevant_keywords:
+                        continue
 
             version = ebuild_file[len(package + '-'):-len('.ebuild')]
             category_plus_package_plus_version = f'{category_plus_package}-{version}'
@@ -39,6 +71,10 @@ def parse_command_line(argv):
 
     add_version_argument_to(parser)
 
+    parser.add_argument('--keywords',
+                        dest='keywords',
+                        default='',
+                        help='set keywords to look for (default: all keywords')
     parser.add_argument('old_portdir', metavar='OLD', help='location of old portdir')
     parser.add_argument('new_portdir', metavar='NEW', help='location of new portdir')
 
