@@ -53,7 +53,7 @@ a virtual machine with…
 - Auto-updates enabled to stay reasonably secure over time
 - Runtime dependencies installed:
   - Docker
-  - Python >=3.7
+  - Python >=3.8
   - rsync
 - An SSH or an HTTP daemon
   (to serve the produced binaries to your consuming Gentoo boxes,
