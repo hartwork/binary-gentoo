@@ -7,8 +7,8 @@ import re
 import sys
 from argparse import ArgumentParser
 
-from ._parser import add_version_argument_to
 from ..reporter import exception_reporting
+from ._parser import add_version_argument_to
 
 keywords_pattern = re.compile('KEYWORDS="(?P<keywords>.*?)"')
 
@@ -17,7 +17,8 @@ def _get_relevant_keywords_set_for(ebuild_content, expected_keywords):
     try:
         ebuild_keywords = keywords_pattern.search(ebuild_content).group('keywords')
     except AttributeError:
-        # if the KEYWORDS variable is not found in the ebuild, we will assume the ebuild needs to be listed
+        # if the KEYWORDS variable is not found in the ebuild,
+        # we will assume the ebuild needs to be listed
         ebuild_keywords = expected_keywords
     expected_keywords_set = set(expected_keywords.split(" "))
     ebuild_keywords_set = set(ebuild_keywords.split(" "))
@@ -45,18 +46,20 @@ def iterate_new_and_changed_ebuilds(config):
                     continue
 
             if config.keywords:
-                with open(new_portdir_ebuild_file, "r") as ifile:
+                with open(new_portdir_ebuild_file) as ifile:
                     new_ebuild_content = ifile.read()
-                new_ebuild_relevant_keywords = _get_relevant_keywords_set_for(new_ebuild_content, config.keywords)
+                new_ebuild_relevant_keywords = _get_relevant_keywords_set_for(
+                    new_ebuild_content, config.keywords)
 
                 # don't output if the new file doesn't include the specified keywords
                 if len(new_ebuild_relevant_keywords) == 0:
                     continue
 
                 if os.path.exists(old_portdir_ebuild_file):
-                    with open(old_portdir_ebuild_file, "r") as ifile:
+                    with open(old_portdir_ebuild_file) as ifile:
                         old_ebuild_content = ifile.read()
-                    old_ebuild_relevant_keywords = _get_relevant_keywords_set_for(old_ebuild_content, config.keywords)
+                    old_ebuild_relevant_keywords = _get_relevant_keywords_set_for(
+                        old_ebuild_content, config.keywords)
 
                     # don't output if both old and new file include the same keywords
                     # (i.e., when only other keywords have changed)
@@ -83,8 +86,8 @@ def parse_command_line(argv):
                         dest='keywords',
                         default='',
                         help='filter the list on these keywords; '
-                             'in case of multiple keywords a space-separated list can be provided '
-                             '(default: all keywords)')
+                        'in case of multiple keywords a space-separated list can be provided '
+                        '(default: all keywords)')
     parser.add_argument('old_portdir', metavar='OLD', help='location of old portdir')
     parser.add_argument('new_portdir', metavar='NEW', help='location of new portdir')
 
