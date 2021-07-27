@@ -74,6 +74,8 @@ def parse_command_line(argv):
         help='enforce Gentoo profile PROFILE'
         ' (e.g. "default/linux/amd64/17.1/developer", default: auto-detect using eselect)')
 
+    parser.add_argument('--use', help='custom one-off use flags (default: none)')
+
     parser.add_argument('--makeopts',
                         metavar='MAKEOPTS',
                         default='-j1',
@@ -126,13 +128,10 @@ def parse_command_line(argv):
                         action='store_true',
                         help='enforce installation (default: build but do not install)')
 
-    parser.add_argument('--use',
-                        help='custom one-off use flags (default: none)')
-
     parser.add_argument('--update',
                         default=False,
                         action='store_true',
-                        help='do an emerge --update (default: False)')
+                        help='pass --update to emerge (default: execute emerge without --update)')
 
     parser.add_argument('--tag-docker-image',
                         dest='tag_docker_image',
@@ -224,7 +223,7 @@ def build(config):
         # This is to avoid access to potentially missing link /etc/portage/make.profile .
         # We cannot run "eselect profile set <profile>" because
         # that would create /etc/portage/make.profile rather than /etc/make.profile .
-        f'ln -f -s {shlex.quote(container_profile_dir)} {shlex.quote(inside_container_make_profile)}',
+        f'ln -f -s {shlex.quote(container_profile_dir)} {shlex.quote(inside_container_make_profile)}',  # noqa: E501
     ]
 
     # Create pretend log dir
@@ -311,16 +310,16 @@ def build(config):
                 install_or_not = ('' if (config.enforce_installation or not is_last_step) else
                                   '--buildpkgonly')
                 if not config.update:
-                    step_commands += [
-                        f'{emerge_quoted_flat} --usepkg=y --onlydeps --verbose-conflicts {shlex.quote(config.atom)}',  # noqa: E501
-                    ]
-                step_commands += [
-                    f'{emerge_quoted_flat} {rebuild_or_not} {install_or_not} {shlex.quote(config.atom)}',  # noqa: E501
-                ]
+                    step_commands.append(
+                        f'{emerge_quoted_flat} --usepkg=y --onlydeps --verbose-conflicts {shlex.quote(config.atom)}'  # noqa: E501
+                    )
+                step_commands.append(
+                    f'{emerge_quoted_flat} {rebuild_or_not} {install_or_not} {shlex.quote(config.atom)}'  # noqa: E501
+                )
 
             if container_name is not None:
-                # Cleanup symlinks that were created in previous steps, otherwise subsequent builds with
-                # --tag-docker-image will fail when the same symlinks are re-created
+                # Cleanup symlinks that were created in previous steps, otherwise subsequent
+                # builds with --tag-docker-image will fail when the same symlinks are re-created
                 step_commands += [
                     f'rm {shlex.quote(inside_container_portdir)}',
                     f'rm {shlex.quote(inside_container_make_profile)}',
@@ -363,7 +362,8 @@ def build(config):
                     os.rmdir(host_pretend_logdir_category)
 
                 if config.tag_docker_image is not None:
-                    announce_and_call(['docker', 'commit', container_name, config.tag_docker_image])
+                    announce_and_call(
+                        ['docker', 'commit', container_name, config.tag_docker_image])
             finally:
                 pretend_log_writer_process.stdin.close()
                 pretend_log_writer_process.wait()
