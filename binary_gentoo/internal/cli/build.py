@@ -215,14 +215,16 @@ def build(config):
     rebuild_or_not = f'--usepkg={"n" if config.enforce_rebuild else "y"}'
 
     container_profile_dir = os.path.join(container_portdir, 'profiles', config.gentoo_profile)
+    inside_container_portdir = '/var/db/repos/gentoo'
+    inside_container_make_profile = '/etc/make.profile'
     container_command_shared_prefix = [
-        f'ln -s {shlex.quote(container_portdir)} /var/db/repos/gentoo',
+        f'ln -s {shlex.quote(container_portdir)} {shlex.quote(inside_container_portdir)}',
         'set -x',
 
         # This is to avoid access to potentially missing link /etc/portage/make.profile .
         # We cannot run "eselect profile set <profile>" because
         # that would create /etc/portage/make.profile rather than /etc/make.profile .
-        f'ln -f -s {shlex.quote(container_profile_dir)} /etc/make.profile',
+        f'ln -f -s {shlex.quote(container_profile_dir)} {shlex.quote(inside_container_make_profile)}',
     ]
 
     # Create pretend log dir
@@ -320,8 +322,8 @@ def build(config):
                 # Cleanup symlinks that were created in previous steps, otherwise subsequent builds with
                 # --tag-docker-image will fail when the same symlinks are re-created
                 step_commands += [
-                    'rm /var/db/repos/gentoo',
-                    'rm /etc/make.profile',
+                    f'rm {shlex.quote(inside_container_portdir)}',
+                    f'rm {shlex.quote(inside_container_make_profile)}',
                 ]
 
             container_command_flat = ' && '.join(step_commands)
