@@ -127,20 +127,16 @@ def parse_command_line(argv):
                         help='enforce installation (default: build but do not install)')
 
     parser.add_argument('--use',
-                        dest='use',
-                        default='',
                         help='custom one-off use flags (default: none)')
 
     parser.add_argument('--update',
-                        dest='update',
                         default=False,
                         action='store_true',
                         help='do an emerge --update (default: False)')
 
     parser.add_argument('--tag-docker-image',
                         dest='tag_docker_image',
-                        default='',
-                        help='create an image of the resulting container')
+                        help='create a Docker image of the resulting container')
 
     parser.add_argument('atom',
                         metavar='ATOM',
@@ -154,27 +150,23 @@ def build(config):
     container_portdir = '/usr/portage'
     container_logdir = '/var/log/portage/'
 
+    emerge_args = [
+        '--oneshot',
+        '--verbose',
+        '--tree',
+        '--jobs=2',
+        f'--load-average={cpu_threads_to_use}',
+        '--buildpkg=y',
+    ]
     if config.update:
-        emerge_args = [
-            '--oneshot',
-            '--verbose',
-            '--tree',
-            '--jobs=2',
-            f'--load-average={cpu_threads_to_use}',
-            '--buildpkg=y',
+        emerge_args += [
             '--update',
             '--changed-use',
             '--newuse',
             '--deep',
         ]
     else:
-        emerge_args = [
-            '--oneshot',
-            '--verbose',
-            '--tree',
-            '--jobs=2',
-            f'--load-average={cpu_threads_to_use}',
-            '--buildpkg=y',
+        emerge_args += [
             '--keep-going',
             '--with-bdeps=y',
             '--complete-graph',
@@ -206,12 +198,17 @@ def build(config):
         f'CFLAGS={shlex.quote(config.cflags)}',
         f'CXXFLAGS={shlex.quote(config.cxxflags)}',
         f'LDFLAGS={shlex.quote(config.ldflags)}',
-        f'USE={shlex.quote(config.use)}'
     ]
 
-    if config.tag_docker_image:
+    if config.use is not None:
+        emerge_env.append(f'USE={shlex.quote(config.use)}')
+
+    if config.tag_docker_image is not None:
+        # TODO there should probably be some sanity checks on the provided image name here
         config.enforce_installation = True
-    container_name = f'gentoo-build-host-{uuid.uuid4().hex}'
+        container_name = f'binary-gentoo-{uuid.uuid4().hex}'
+    else:
+        container_name = None
 
     emerge = ['env'] + emerge_env + ['emerge'] + emerge_args
     emerge_quoted_flat = ' '.join(emerge)
@@ -319,15 +316,17 @@ def build(config):
                     f'{emerge_quoted_flat} {rebuild_or_not} {install_or_not} {shlex.quote(config.atom)}',  # noqa: E501
                 ]
 
-            # Cleanup previous steps
-            step_commands += [
-                'rm /var/db/repos/gentoo',
-                'rm /etc/make.profile',
-            ]
+            if container_name is not None:
+                # Cleanup symlinks that were created in previous steps, otherwise subsequent builds with
+                # --tag-docker-image will fail when the same symlinks are re-created
+                step_commands += [
+                    'rm /var/db/repos/gentoo',
+                    'rm /etc/make.profile',
+                ]
 
             container_command_flat = ' && '.join(step_commands)
 
-            if config.tag_docker_image:
+            if config.tag_docker_image is not None:
                 docker_container_lifecycle_arg = f'--name={container_name}'
             else:
                 docker_container_lifecycle_arg = '--rm'
@@ -361,13 +360,13 @@ def build(config):
                     os.rmdir(host_pretend_logdir_category_package)
                     os.rmdir(host_pretend_logdir_category)
 
-                if config.tag_docker_image:
+                if config.tag_docker_image is not None:
                     announce_and_call(['docker', 'commit', container_name, config.tag_docker_image])
             finally:
                 pretend_log_writer_process.stdin.close()
                 pretend_log_writer_process.wait()
 
-                if config.tag_docker_image:
+                if config.tag_docker_image is not None:
                     announce_and_call(['docker', 'rm', container_name])
 
 
