@@ -45,14 +45,14 @@ def iterate_new_and_changed_ebuilds(config):
                 if filecmp.cmp(old_portdir_ebuild_file, new_portdir_ebuild_file):
                     continue
 
-            if config.keywords:
+            if config.keywords is not None:
                 with open(new_portdir_ebuild_file) as ifile:
                     new_ebuild_content = ifile.read()
                 new_ebuild_relevant_keywords = _get_relevant_keywords_set_for(
                     new_ebuild_content, config.keywords)
 
                 # don't output if the new file doesn't include the specified keywords
-                if len(new_ebuild_relevant_keywords) == 0:
+                if not new_ebuild_relevant_keywords:
                     continue
 
                 if os.path.exists(old_portdir_ebuild_file):
@@ -83,11 +83,10 @@ def parse_command_line(argv):
     add_version_argument_to(parser)
 
     parser.add_argument('--keywords',
-                        dest='keywords',
-                        default='',
-                        help='filter the list on these keywords; '
-                        'in case of multiple keywords a space-separated list can be provided '
-                        '(default: all keywords)')
+                        help='include only packages/versions/revisions that have these keywords; '
+                        'in case of multiple keywords a space-separated list can be provided; '
+                        'only arch and ~arch syntax are accepted, no special keywords '
+                        '(default: auto-detect using portageq)')
     parser.add_argument('old_portdir', metavar='OLD', help='location of old portdir')
     parser.add_argument('new_portdir', metavar='NEW', help='location of new portdir')
 
