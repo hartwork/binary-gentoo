@@ -10,12 +10,12 @@ from argparse import ArgumentParser
 from ..reporter import exception_reporting
 from ._parser import add_version_argument_to
 
-keywords_pattern = re.compile('KEYWORDS="(?P<keywords>.*?)"')
+_keywords_pattern = re.compile('KEYWORDS="(?P<keywords>[^"])"')
 
 
 def _get_relevant_keywords_set_for(ebuild_content, expected_keywords):
     try:
-        ebuild_keywords = keywords_pattern.search(ebuild_content).group('keywords')
+        ebuild_keywords = _keywords_pattern.search(ebuild_content).group('keywords')
     except AttributeError:
         # if the KEYWORDS variable is not found in the ebuild,
         # we will assume the ebuild needs to be listed
