@@ -17,12 +17,17 @@ from enum import Enum, auto
 
 import yaml
 
-from ..atoms import ATOM_LIKE_DISPLAY, extract_category_package_from
+from ..atoms import ATOM_LIKE_DISPLAY, SET_DISPLAY, extract_category_package_from, extract_set_from
 from ..reporter import announce_and_call, announce_and_check_output, exception_reporting
 from ._enrich import enrich_host_distdir_of, enrich_host_pkgdir_of, enrich_host_portdir_of
 from ._parser import (add_distdir_argument_to, add_docker_image_argument_to,
                       add_interactive_argument_to, add_pkgdir_argument_to, add_portdir_argument_to,
                       add_version_argument_to)
+
+
+class EmergeTargetType(Enum):
+    PACKAGE = auto()
+    SET = auto()
 
 
 def determine_host_gentoo_profile():
@@ -230,12 +235,18 @@ def build(config):
 
     # Create pretend log dir
     try:
-        category, package = extract_category_package_from(config.atom)
-    except ValueError:
-        category, package = 'set', extract_category_package_from(config.atom)
+        emerge_target_type = EmergeTargetType.PACKAGE
+        category, package_or_set = extract_category_package_from(config.emerge_target)
+    except ValueError as package_error:
+        try:
+            emerge_target_type = EmergeTargetType.SET
+            category, package_or_set = 'sets', extract_set_from(config.emerge_target)
+        except ValueError as set_error:
+            raise ValueError(f'{str(package_error)}; {str(set_error)}')
+
     host_logdir__root = os.path.join(config.host_logdir, 'binary-gentoo')
     host_logdir__category = os.path.join(host_logdir__root, category)
-    host_logdir__category__package = os.path.join(host_logdir__category, package)
+    host_logdir__category__package = os.path.join(host_logdir__category, package_or_set)
     os.makedirs(host_logdir__category__package, mode=0o700, exist_ok=True)
 
     with tempfile.TemporaryDirectory() as eventual_etc_portage:
@@ -256,11 +267,12 @@ def build(config):
                     'ZZ-global')  # to be third last in alphabetic order
                 shutil.copyfile(global_package_use_file_source, global_package_use_file_target)
 
-            flavors_yml_file = os.path.join(config.host_flavors_dir, category, package,
-                                            'flavors.yml')
-            with suppress(OSError), open(flavors_yml_file) as f:
-                # TODO validate flavors.yml file content
-                flavors_yml_doc = yaml.safe_load(f)
+            if emerge_target_type == EmergeTargetType.PACKAGE:
+                flavors_yml_file = os.path.join(config.host_flavors_dir, category, package_or_set,
+                                                'flavors.yml')
+                with suppress(OSError), open(flavors_yml_file) as f:
+                    # TODO validate flavors.yml file content
+                    flavors_yml_doc = yaml.safe_load(f)
 
         # Write package.use level "common to all flavors", 2 of 4
         common_package_use_file_content = flavors_yml_doc.get('package.use')
