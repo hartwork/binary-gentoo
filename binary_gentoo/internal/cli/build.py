@@ -140,11 +140,11 @@ def parse_command_line(argv):
                         help='pass --update to emerge (default: execute emerge without --update)')
 
     parser.add_argument('--tag-docker-image',
+                        metavar='IMAGE',
                         dest='tag_docker_image',
                         help='create a Docker image of the resulting container')
 
-    parser.add_argument('atom',
-                        dest='emerge_target',
+    parser.add_argument('emerge_target',
                         metavar='CP|CPV|=CPV|@SET',
                         help=f'Package atom (format "{ATOM_LIKE_DISPLAY}" or "{SET_DISPLAY})')
 
