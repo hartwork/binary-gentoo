@@ -13,6 +13,7 @@ import tempfile
 import uuid
 from argparse import ArgumentParser
 from contextlib import suppress
+from enum import Enum, auto
 
 import yaml
 
@@ -138,8 +139,9 @@ def parse_command_line(argv):
                         help='create a Docker image of the resulting container')
 
     parser.add_argument('atom',
-                        metavar='ATOM',
-                        help=f'Package atom (format "{ATOM_LIKE_DISPLAY}")')
+                        dest='emerge_target',
+                        metavar='CP|CPV|=CPV|@SET',
+                        help=f'Package atom (format "{ATOM_LIKE_DISPLAY}" or "{SET_DISPLAY})')
 
     return parser.parse_args(argv[1:])
 
@@ -311,10 +313,10 @@ def build(config):
                                   '--buildpkgonly')
                 if not config.update:
                     step_commands.append(
-                        f'{emerge_quoted_flat} --usepkg=y --onlydeps --verbose-conflicts {shlex.quote(config.atom)}'  # noqa: E501
+                        f'{emerge_quoted_flat} --usepkg=y --onlydeps --verbose-conflicts {shlex.quote(config.emerge_target)}'  # noqa: E501
                     )
                 step_commands.append(
-                    f'{emerge_quoted_flat} {rebuild_or_not} {install_or_not} {shlex.quote(config.atom)}'  # noqa: E501
+                    f'{emerge_quoted_flat} {rebuild_or_not} {install_or_not} {shlex.quote(config.emerge_target)}'  # noqa: E501
                 )
 
             if container_name is not None:
