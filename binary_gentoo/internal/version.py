@@ -1,1 +1,1 @@
-VERSION_STR = '5.0.1'
+VERSION_STR = '6.0.0'

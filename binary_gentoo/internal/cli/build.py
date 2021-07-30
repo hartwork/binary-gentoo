@@ -233,10 +233,10 @@ def build(config):
         category, package = extract_category_package_from(config.atom)
     except ValueError:
         category, package = 'set', extract_category_package_from(config.atom)
-    host_pretend_logdir = os.path.join(config.host_logdir, 'binary-gentoo')
-    host_pretend_logdir_category = os.path.join(host_pretend_logdir, category)
-    host_pretend_logdir_category_package = os.path.join(host_pretend_logdir_category, package)
-    os.makedirs(host_pretend_logdir_category_package, mode=0o700, exist_ok=True)
+    host_logdir__root = os.path.join(config.host_logdir, 'binary-gentoo')
+    host_logdir__category = os.path.join(host_logdir__root, category)
+    host_logdir__category__package = os.path.join(host_logdir__category, package)
+    os.makedirs(host_logdir__category__package, mode=0o700, exist_ok=True)
 
     with tempfile.TemporaryDirectory() as eventual_etc_portage:
         rsync_argv = [
@@ -285,10 +285,10 @@ def build(config):
 
             filename_timestamp = str(datetime.datetime.now()).replace(' ', '-').replace(
                 ':', '-').replace('.', '-')
-            pretend_fail_log_filename = os.path.join(host_pretend_logdir_category_package,
-                                                     filename_timestamp + '-fail.log')
-            pretend_log_writer_process = subprocess.Popen(['tee', pretend_fail_log_filename],
-                                                          stdin=subprocess.PIPE)
+            host_log_filename = os.path.join(host_logdir__category__package,
+                                             filename_timestamp + '-fail.log')
+            log_writer_process = subprocess.Popen(['tee', host_log_filename],
+                                                  stdin=subprocess.PIPE)
 
             # Assemble build command list
             steps = flavor.get('steps', [{}])
@@ -357,18 +357,18 @@ def build(config):
 
             try:
                 announce_and_call(['docker', 'run'] + docker_run_args,
-                                  stdout=pretend_log_writer_process.stdin)
-                os.remove(pretend_fail_log_filename)
+                                  stdout=log_writer_process.stdin)
+                os.remove(host_log_filename)
                 with suppress(OSError):
-                    os.rmdir(host_pretend_logdir_category_package)
-                    os.rmdir(host_pretend_logdir_category)
+                    os.rmdir(host_logdir__category__package)
+                    os.rmdir(host_logdir__category)
 
                 if config.tag_docker_image is not None:
                     announce_and_call(
                         ['docker', 'commit', container_name, config.tag_docker_image])
             finally:
-                pretend_log_writer_process.stdin.close()
-                pretend_log_writer_process.wait()
+                log_writer_process.stdin.close()
+                log_writer_process.wait()
 
                 if config.tag_docker_image is not None:
                     announce_and_call(['docker', 'rm', container_name])
