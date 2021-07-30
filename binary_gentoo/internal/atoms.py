@@ -10,6 +10,7 @@ _atom_cpv_pattern = f'={_cp_pattern}-{_v_pattern}'
 _set_pattern = '(?P<set>@[a-z0-9-_]+)'
 
 ATOM_LIKE_DISPLAY = '[=]<category>/<package>[-<version>[-r<revision>]]'
+SET_DISPLAY = '@<set>'
 
 
 def extract_category_package_from(atomlike):
@@ -22,8 +23,8 @@ def extract_category_package_from(atomlike):
     return match.group('category'), match.group('package')
 
 
-def extract_set_from(atomlike):
-    match = re.compile(_set_pattern).match(atomlike)
+def extract_set_from(set_candidate):
+    match = re.compile(_set_pattern).match(set_candidate)
     if match is None:
         raise ValueError(f'Not valid "{SET_DISPLAY}" syntax for set: {set_candidate!r}')
     return match.group('set')
