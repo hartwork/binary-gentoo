@@ -211,7 +211,6 @@ def build(config):
 
     if config.tag_docker_image is not None:
         # TODO there should probably be some sanity checks on the provided image name here
-        config.enforce_installation = True
         container_name = f'binary-gentoo-{uuid.uuid4().hex}'
     else:
         container_name = None
@@ -321,8 +320,9 @@ def build(config):
                     step_commands.append(f'rm -f {flavor_package_use_file}')  # from previous step
                     prior_step_package_use_file_exists = False
 
-                install_or_not = ('' if (config.enforce_installation or not is_last_step) else
-                                  '--buildpkgonly')
+                enforce_installation = config.enforce_installation or not is_last_step or (
+                            config.tag_docker_image is not None)
+                install_or_not = '' if enforce_installation else '--buildpkgonly'
                 if not config.update:
                     step_commands.append(
                         f'{emerge_quoted_flat} --usepkg=y --onlydeps --verbose-conflicts {shlex.quote(config.emerge_target)}'  # noqa: E501
