@@ -13,17 +13,18 @@ from ._parser import add_version_argument_to
 _keywords_pattern = re.compile('KEYWORDS="(?P<keywords>[^"])"')
 
 
-def _get_relevant_keywords_set_for(ebuild_content, expected_keywords):
-    try:
-        ebuild_keywords = _keywords_pattern.search(ebuild_content).group('keywords')
-    except AttributeError:
+def _get_relevant_keywords_set_for(ebuild_content, accept_keywords):
+    match = _keywords_pattern.search(ebuild_content)
+    if match is None:
         # if the KEYWORDS variable is not found in the ebuild,
         # we will assume the ebuild needs to be listed
-        ebuild_keywords = expected_keywords
-    expected_keywords_set = set(expected_keywords.split(" "))
+        ebuild_keywords = accept_keywords
+    else:
+        ebuild_keywords = match.group('keywords')
+    accept_keywords_set = set(accept_keywords.split(" "))
     ebuild_keywords_set = set(ebuild_keywords.split(" "))
 
-    return expected_keywords_set & ebuild_keywords_set
+    return accept_keywords_set & ebuild_keywords_set
 
 
 def iterate_new_and_changed_ebuilds(config):
