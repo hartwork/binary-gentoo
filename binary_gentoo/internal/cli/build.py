@@ -129,7 +129,7 @@ def parse_command_line(argv):
     parser.add_argument('--tag-docker-image',
                         metavar='IMAGE',
                         dest='tag_docker_image',
-                        help='create a Docker image of the resulting container')
+                        help='create a Docker image from the resulting container')
 
     parser.add_argument('atom',
                         metavar='ATOM',
