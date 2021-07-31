@@ -40,11 +40,16 @@ def iterate_new_and_changed_ebuilds(config):
                                                    ebuild_file)
             new_portdir_ebuild_file = os.path.join(root, ebuild_file)
 
+            # don't output 9999 ebuilds
+            if ebuild_file.endswith('-9999.ebuild'):
+                continue
+
             # don't output if files are identical
             if os.path.exists(old_portdir_ebuild_file):
                 if filecmp.cmp(old_portdir_ebuild_file, new_portdir_ebuild_file):
                     continue
 
+            # include only specific keywords sets
             if config.keywords is not None:
                 with open(new_portdir_ebuild_file) as ifile:
                     new_ebuild_content = ifile.read()
