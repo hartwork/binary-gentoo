@@ -10,6 +10,7 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import uuid
 from argparse import ArgumentParser
 from contextlib import suppress
 
@@ -125,6 +126,11 @@ def parse_command_line(argv):
                         action='store_true',
                         help='enforce installation (default: build but do not install)')
 
+    parser.add_argument('--tag-docker-image',
+                        metavar='IMAGE',
+                        dest='tag_docker_image',
+                        help='create a Docker image of the resulting container')
+
     parser.add_argument('atom',
                         metavar='ATOM',
                         help=f'Package atom (format "{ATOM_LIKE_DISPLAY}")')
@@ -176,19 +182,27 @@ def build(config):
         f'LDFLAGS={shlex.quote(config.ldflags)}',
     ]
 
+    if config.tag_docker_image is not None:
+        # TODO there should probably be some sanity checks on the provided image name here
+        container_name = f'binary-gentoo-{uuid.uuid4().hex}'
+    else:
+        container_name = None
+
     emerge = ['env'] + emerge_env + ['emerge'] + emerge_args
     emerge_quoted_flat = ' '.join(emerge)
     rebuild_or_not = f'--usepkg={"n" if config.enforce_rebuild else "y"}'
 
     container_profile_dir = os.path.join(container_portdir, 'profiles', config.gentoo_profile)
+    inside_container_portdir = '/var/db/repos/gentoo'
+    inside_container_make_profile = '/etc/make.profile'
     container_command_shared_prefix = [
-        f'ln -s {shlex.quote(container_portdir)} /var/db/repos/gentoo',
+        f'ln -s {shlex.quote(container_portdir)} {shlex.quote(inside_container_portdir)}',
         'set -x',
 
         # This is to avoid access to potentially missing link /etc/portage/make.profile .
         # We cannot run "eselect profile set <profile>" because
         # that would create /etc/portage/make.profile rather than /etc/make.profile .
-        f'ln -f -s {shlex.quote(container_profile_dir)} /etc/make.profile',
+        f'ln -f -s {shlex.quote(container_profile_dir)} {shlex.quote(inside_container_make_profile)}',  # noqa: E501
     ]
 
     # Create pretend log dir
@@ -269,17 +283,31 @@ def build(config):
                     step_commands.append(f'rm -f {flavor_package_use_file}')  # from previous step
                     prior_step_package_use_file_exists = False
 
-                install_or_not = ('' if (config.enforce_installation or not is_last_step) else
-                                  '--buildpkgonly')
+                enforce_installation = config.enforce_installation or not is_last_step or (
+                            config.tag_docker_image is not None)
+                install_or_not = '' if enforce_installation else '--buildpkgonly'
                 step_commands += [
                     f'{emerge_quoted_flat} --usepkg=y --onlydeps --verbose-conflicts {shlex.quote(config.atom)}',  # noqa: E501
                     f'{emerge_quoted_flat} {rebuild_or_not} {install_or_not} {shlex.quote(config.atom)}',  # noqa: E501
                 ]
 
+            if container_name is not None:
+                # Cleanup symlinks that were created in previous steps, otherwise subsequent
+                # builds with --tag-docker-image will fail when the same symlinks are re-created
+                step_commands += [
+                    f'rm {shlex.quote(inside_container_portdir)}',
+                    f'rm {shlex.quote(inside_container_make_profile)}',
+                ]
+
             container_command_flat = ' && '.join(step_commands)
 
+            if config.tag_docker_image is not None:
+                docker_container_lifecycle_arg = f'--name={container_name}'
+            else:
+                docker_container_lifecycle_arg = '--rm'
+
             docker_run_args = [
-                '--rm',
+                docker_container_lifecycle_arg,
                 '-v',
                 f'{eventual_etc_portage}:/etc/portage:rw',
                 '-v',
@@ -306,9 +334,16 @@ def build(config):
                 with suppress(OSError):
                     os.rmdir(host_logdir__category__package)
                     os.rmdir(host_logdir__category)
+
+                if config.tag_docker_image is not None:
+                    announce_and_call(
+                        ['docker', 'commit', container_name, config.tag_docker_image])
             finally:
                 log_writer_process.stdin.close()
                 log_writer_process.wait()
+
+                if config.tag_docker_image is not None:
+                    announce_and_call(['docker', 'rm', container_name])
 
 
 def main():
