@@ -73,6 +73,8 @@ def parse_command_line(argv):
         help='enforce Gentoo profile PROFILE'
         ' (e.g. "default/linux/amd64/17.1/developer", default: auto-detect using eselect)')
 
+    parser.add_argument('--use', help='custom one-off use flags (default: none)')
+
     parser.add_argument('--makeopts',
                         metavar='MAKEOPTS',
                         default='-j1',
@@ -191,6 +193,9 @@ def build(config):
         f'CXXFLAGS={shlex.quote(config.cxxflags)}',
         f'LDFLAGS={shlex.quote(config.ldflags)}',
     ]
+
+    if config.use is not None:
+        emerge_env.append(f'USE={shlex.quote(config.use)}')
 
     emerge = ['env'] + emerge_env + ['emerge'] + emerge_args
     emerge_quoted_flat = ' '.join(emerge)

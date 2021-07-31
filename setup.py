@@ -25,7 +25,6 @@ if __name__ == '__main__':
         ],
         tests_require=[
             'freezegun',
-            'mock',
             'parameterized',
         ],
         packages=find_packages(),
