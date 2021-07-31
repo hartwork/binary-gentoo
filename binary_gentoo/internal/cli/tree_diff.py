@@ -5,6 +5,7 @@ import filecmp
 import os
 import re
 import sys
+import typing
 from argparse import ArgumentParser
 
 from ..reporter import exception_reporting
@@ -13,18 +14,19 @@ from ._parser import add_version_argument_to
 _keywords_pattern = re.compile('KEYWORDS="(?P<keywords>[^"])"')
 
 
-def _get_relevant_keywords_set_for(ebuild_content, accept_keywords):
+def _get_relevant_keywords_set_for(ebuild_content: str, accept_keywords: typing.Iterable) -> set:
     match = _keywords_pattern.search(ebuild_content)
     if match is None:
         # if the KEYWORDS variable is not found in the ebuild,
         # we will assume the ebuild needs to be listed
         ebuild_keywords = accept_keywords
     else:
-        ebuild_keywords = match.group('keywords')
-    accept_keywords_set = set(accept_keywords.split(" "))
-    ebuild_keywords_set = set(ebuild_keywords.split(" "))
+        ebuild_keywords = match.group('keywords').split(" ")
 
-    return accept_keywords_set & ebuild_keywords_set
+    if isinstance(accept_keywords, str):
+        accept_keywords = accept_keywords.split(" ")
+
+    return set(accept_keywords) & set(ebuild_keywords)
 
 
 def iterate_new_and_changed_ebuilds(config):
