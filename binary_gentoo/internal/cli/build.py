@@ -284,7 +284,7 @@ def build(config):
                     prior_step_package_use_file_exists = False
 
                 enforce_installation = config.enforce_installation or not is_last_step or (
-                            config.tag_docker_image is not None)
+                    config.tag_docker_image is not None)
                 install_or_not = '' if enforce_installation else '--buildpkgonly'
                 step_commands += [
                     f'{emerge_quoted_flat} --usepkg=y --onlydeps --verbose-conflicts {shlex.quote(config.atom)}',  # noqa: E501
