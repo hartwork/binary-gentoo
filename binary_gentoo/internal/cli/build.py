@@ -151,6 +151,9 @@ def build(config):
         '--jobs=2',
         f'--load-average={cpu_threads_to_use}',
         '--buildpkg=y',
+        '--with-bdeps=y',
+        '--keep-going',
+        '--complete-graph',
     ]
     if config.update:
         emerge_args += [
@@ -158,12 +161,6 @@ def build(config):
             '--changed-use',
             '--newuse',
             '--deep',
-        ]
-    else:
-        emerge_args += [
-            '--keep-going',
-            '--with-bdeps=y',
-            '--complete-graph',
         ]
 
     features_flat = ' '.join([
