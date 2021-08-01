@@ -135,7 +135,7 @@ def parse_command_line(argv):
 
     parser.add_argument('emerge_target',
                         metavar='CP|CPV|=CPV|@SET',
-                        help=f'Package atom (format "{ATOM_LIKE_DISPLAY}" or "{SET_DISPLAY})')
+                        help=f'Package atom or set (format "{ATOM_LIKE_DISPLAY}" or "{SET_DISPLAY})')
 
     return parser.parse_args(argv[1:])
 
@@ -211,7 +211,7 @@ def build(config):
             emerge_target_type = EmergeTargetType.SET
             category, package_or_set = 'sets', extract_set_from(config.emerge_target)
         except ValueError as set_error:
-            raise ValueError(f'{str(package_error)}; {str(set_error)}')
+            raise ValueError(f'{package_error}; {set_error}')
 
     host_logdir__root = os.path.join(config.host_logdir, 'binary-gentoo')
     host_logdir__category = os.path.join(host_logdir__root, category)

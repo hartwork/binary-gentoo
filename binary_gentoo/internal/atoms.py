@@ -19,12 +19,12 @@ def extract_category_package_from(atomlike):
         if match is not None:
             break
     else:
-        raise ValueError(f'Not valid "{ATOM_LIKE_DISPLAY}" syntax for package: {atomlike!r}')
+        raise ValueError(f'Not valid "{ATOM_LIKE_DISPLAY}" syntax: {atomlike!r}')
     return match.group('category'), match.group('package')
 
 
 def extract_set_from(set_candidate):
     match = re.compile(_set_pattern).match(set_candidate)
     if match is None:
-        raise ValueError(f'Not valid "{SET_DISPLAY}" syntax for set: {set_candidate!r}')
+        raise ValueError(f'Not valid "{SET_DISPLAY}" syntax: {set_candidate!r}')
     return match.group('set')
