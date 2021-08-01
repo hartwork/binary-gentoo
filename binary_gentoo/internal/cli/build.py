@@ -133,11 +133,26 @@ def parse_command_line(argv):
                         action='store_true',
                         help='enforce installation (default: build but do not install)')
 
-    parser.add_argument('emerge_target',
-                        metavar='CP|CPV|=CPV|@SET',
-                        help=f'Package atom or set (format "{ATOM_LIKE_DISPLAY}" or "{SET_DISPLAY})')
+    parser.add_argument(
+        'emerge_target',
+        metavar='CP|CPV|=CPV|@SET',
+        help=f'Package atom or set (format "{ATOM_LIKE_DISPLAY}" or "{SET_DISPLAY})')
 
     return parser.parse_args(argv[1:])
+
+
+def classify_emerge_target(emerge_target):
+    try:
+        emerge_target_type = EmergeTargetType.PACKAGE
+        category, package_or_set = extract_category_package_from(emerge_target)
+    except ValueError as package_error:
+        try:
+            emerge_target_type = EmergeTargetType.SET
+            category, package_or_set = 'sets', extract_set_from(emerge_target)
+        except ValueError as set_error:
+            raise ValueError(f'{package_error}; {set_error}')
+
+    return emerge_target_type, category, package_or_set
 
 
 def build(config):
@@ -202,17 +217,8 @@ def build(config):
         f'ln -f -s {shlex.quote(container_profile_dir)} /etc/make.profile',
     ]
 
-    # Create pretend log dir
-    try:
-        emerge_target_type = EmergeTargetType.PACKAGE
-        category, package_or_set = extract_category_package_from(config.emerge_target)
-    except ValueError as package_error:
-        try:
-            emerge_target_type = EmergeTargetType.SET
-            category, package_or_set = 'sets', extract_set_from(config.emerge_target)
-        except ValueError as set_error:
-            raise ValueError(f'{package_error}; {set_error}')
-
+    # Create log dir
+    emerge_target_type, category, package_or_set = classify_emerge_target(config.emerge_target)
     host_logdir__root = os.path.join(config.host_logdir, 'binary-gentoo')
     host_logdir__category = os.path.join(host_logdir__root, category)
     host_logdir__category__package = os.path.join(host_logdir__category, package_or_set)
