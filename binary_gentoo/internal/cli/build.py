@@ -188,7 +188,6 @@ def build(config):
         emerge_env.append(f'USE={shlex.quote(config.use)}')
 
     if config.tag_docker_image is not None:
-        # TODO there should probably be some sanity checks on the provided image name here
         container_name = f'binary-gentoo-{uuid.uuid4().hex}'
     else:
         container_name = None
