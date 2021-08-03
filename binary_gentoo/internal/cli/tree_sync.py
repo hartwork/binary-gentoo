@@ -47,10 +47,11 @@ def sync(config):
 
     container_command_flat = ' && '.join(container_command)
 
+    docker_volume_args = ['-v', f'{config.host_portdir}:{container_portdir}:rw']
+
     docker_run_args = [
         '--rm',
-        '-v',
-        f'{config.host_portdir}:{container_portdir}:rw',
+    ] + docker_volume_args + [
         config.docker_image,
         'sh',
         '-c',
