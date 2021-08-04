@@ -71,8 +71,9 @@ def sync(config):
         container_command.append(rsync_command)
 
     container_command += [
-        # This will fix /etc/portage/make.profile
-        # and hence suppress the warning about an invalid profile
+        # This will suppress the warning about an invalid profile
+        # by giving symlink /etc/portage/make.profile (that currently points to
+        # non-existing "../../var/db/repos/gentoo/profiles/[..]") a valid target
         f'ln -s {shlex.quote(container_portdir)} /var/db/repos/gentoo',
         f'env PORTDIR={shlex.quote(container_portdir)} emerge-webrsync --verbose',
     ]
