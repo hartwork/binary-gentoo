@@ -26,7 +26,7 @@ and are meant to be combined using a glue language like Bash:
 - `gentoo-local-queue` – Manages simple file-based push/pop build task queues
 - `gentoo-packages` — Do operations on pkgdir (other than `emaint --fix binhost`)
 - `gentoo-tree-diff` – Lists packages/versions/revisions that one portdir has over another
-- `gentoo-tree-sync` – Brings a given portdir directory up to date
+- `gentoo-tree-sync` – Brings a given portdir directory (and its backup) up to date
 
 **binary-gentoo**
 is software libre licensed under the `GNU Affero GPL version 3 or later` license.

@@ -75,7 +75,7 @@ jobs:
           mkdir etc-portage/
           echo 'ACCEPT_KEYWORDS="~amd64"' > etc-portage/make.conf
 
-          gentoo-tree-sync --non-interactive portdir/
+          gentoo-tree-sync --non-interactive --backup-to portdir-old/ portdir/
 
           gentoo-build \
               --non-interactive \

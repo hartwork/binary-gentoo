@@ -13,7 +13,7 @@ from ._parser import (add_docker_image_argument_to, add_interactive_argument_to,
 
 def parse_command_line(argv):
     parser = ArgumentParser(prog='gentoo-tree-sync',
-                            description='Brings a given portdir up to date')
+                            description='Brings a given portdir (and its backup) up to date')
 
     add_version_argument_to(parser)
 
@@ -28,17 +28,47 @@ def parse_command_line(argv):
                         help=('location for PORTDIR'
                               ' (e.g. "/var/db/repos/gentoo" or "/usr/portage")'))
 
+    parser.add_argument('--backup-to',
+                        dest='host_backup_portdir',
+                        metavar='DIR',
+                        help=('location to backup original state of PORTDIR to'
+                              ' (e.g. "/var/db/repos/gentoo-old" or "/usr/portage-old")'
+                              ' prior to synchronisation (using "rsync --archive --delete [..]")'))
+
     config = parser.parse_args(argv[1:])
 
     config.host_portdir = os.path.realpath(config.host_portdir)
 
+    if config.host_backup_portdir is not None:
+        config.host_backup_portdir = os.path.realpath(config.host_backup_portdir)
+
     return config
+
+
+def _with_trailing_slash(text):
+    return text.rstrip('/') + '/'
 
 
 def sync(config):
     container_portdir = '/usr/portage'
+    container_backup_portdir = '/mnt/portage-backup'
 
-    container_command = [
+    container_command = []
+
+    if config.host_backup_portdir:
+        rsync_argv = [
+            'rsync',
+            '--archive',
+            '--delete',
+            '--verbose',
+            '--progress',
+            _with_trailing_slash(container_portdir),
+            _with_trailing_slash(container_backup_portdir),
+        ]
+        rsync_command = ' '.join(shlex.quote(a) for a in rsync_argv)
+        container_command.append(rsync_command)
+
+    container_command += [
         # This will fix /etc/portage/make.profile
         # and hence suppress the warning about an invalid profile
         f'ln -s {shlex.quote(container_portdir)} /var/db/repos/gentoo',
@@ -48,6 +78,8 @@ def sync(config):
     container_command_flat = ' && '.join(container_command)
 
     docker_volume_args = ['-v', f'{config.host_portdir}:{container_portdir}:rw']
+    if config.host_backup_portdir:
+        docker_volume_args += ['-v', f'{config.host_backup_portdir}:{container_backup_portdir}:rw']
 
     docker_run_args = [
         '--rm',
