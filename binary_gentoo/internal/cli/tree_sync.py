@@ -53,7 +53,9 @@ def sync(config):
     container_portdir = '/usr/portage'
     container_backup_portdir = '/mnt/portage-backup'
 
-    container_command = []
+    container_command = [
+        'set -x',
+    ]
 
     if config.host_backup_portdir:
         rsync_argv = [
