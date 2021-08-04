@@ -91,3 +91,10 @@ jobs:
               media-gfx/optipng
 
           find logs/ packages/
+
+          gentoo-packages --pkgdir packages/ list
+          sudo chown -R "${USER}:${USER}" packages/
+          gentoo-packages --pkgdir packages/ delete --metadata media-gfx/optipng
+          gentoo-packages --pkgdir packages/ list
+
+          find packages/
