@@ -136,7 +136,7 @@ def parse_command_line(argv):
     parser.add_argument(
         'emerge_target',
         metavar='CP|CPV|=CPV|@SET',
-        help=f'Package atom or set (format "{ATOM_LIKE_DISPLAY}" or "{SET_DISPLAY})')
+        help=f'Package atom or set (format "{ATOM_LIKE_DISPLAY}" or "{SET_DISPLAY}")')
 
     return parser.parse_args(argv[1:])
 
