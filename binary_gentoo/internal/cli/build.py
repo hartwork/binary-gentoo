@@ -151,8 +151,8 @@ def build(config):
         '--jobs=2',
         f'--load-average={cpu_threads_to_use}',
         '--buildpkg=y',
-        '--with-bdeps=y',
         '--keep-going',
+        '--with-bdeps=y',
         '--complete-graph',
     ]
     if config.update:
