@@ -133,6 +133,11 @@ def parse_command_line(argv):
                         action='store_true',
                         help='enforce installation (default: build but do not install)')
 
+    parser.add_argument('--update',
+                        default=False,
+                        action='store_true',
+                        help='pass --update to emerge (default: execute emerge without --update)')
+
     parser.add_argument(
         'emerge_target',
         metavar='CP|CPV|=CPV|@SET',
@@ -171,6 +176,14 @@ def build(config):
         '--with-bdeps=y',
         '--complete-graph',
     ]
+    if config.update:
+        emerge_args += [
+            '--update',
+            '--changed-use',
+            '--newuse',
+            '--deep',
+        ]
+
     features_flat = ' '.join([
         '-news',
         'binpkg-multi-instance',
@@ -298,10 +311,13 @@ def build(config):
 
                 install_or_not = ('' if (config.enforce_installation or not is_last_step) else
                                   '--buildpkgonly')
-                step_commands += [
-                    f'{emerge_quoted_flat} --usepkg=y --onlydeps --verbose-conflicts {shlex.quote(config.emerge_target)}',  # noqa: E501
-                    f'{emerge_quoted_flat} {rebuild_or_not} {install_or_not} {shlex.quote(config.emerge_target)}',  # noqa: E501
-                ]
+                if not config.update:
+                    step_commands.append(
+                        f'{emerge_quoted_flat} --usepkg=y --onlydeps --verbose-conflicts {shlex.quote(config.emerge_target)}'  # noqa: E501
+                    )
+                step_commands.append(
+                    f'{emerge_quoted_flat} {rebuild_or_not} {install_or_not} {shlex.quote(config.emerge_target)}'  # noqa: E501
+                )
 
             container_command_flat = ' && '.join(step_commands)
 
