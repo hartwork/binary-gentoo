@@ -38,12 +38,14 @@ def parse_command_line(argv):
 def sync(config):
     container_portdir = '/usr/portage'
 
-    container_command_flat = ' && '.join([
+    container_command = [
         # This will fix /etc/portage/make.profile
         # and hence suppress the warning about an invalid profile
         f'ln -s {shlex.quote(container_portdir)} /var/db/repos/gentoo',
         f'env PORTDIR={shlex.quote(container_portdir)} emerge-webrsync --verbose',
-    ])
+    ]
+
+    container_command_flat = ' && '.join(container_command)
 
     docker_run_args = [
         '--rm',
