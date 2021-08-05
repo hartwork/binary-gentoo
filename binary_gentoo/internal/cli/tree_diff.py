@@ -36,8 +36,15 @@ def _get_relevant_keywords_set_for(ebuild_content: str,
     return set(accept_keywords) & set(ebuild_keywords)
 
 
-def _keywords_included_in_ebuild(accept_keywords: Iterable[str], old_portdir_ebuild_file,
-                                 new_portdir_ebuild_file) -> bool:
+def _keywords_included_in_ebuild(accept_keywords: Iterable[str],
+                                 new_portdir_ebuild_file: str,
+                                 old_portdir_ebuild_file: str = None) -> bool:
+    """
+    Check if the new_portdir_ebuild_file contains the accept_keywords. Returns True if that is the
+    case, otherwise False. If old_portdir_ebuild_file is passed, an extra comparison is made
+    between the relevant keywords in the old and the new ebuild. If these keywords are identical,
+    return False.
+    """
 
     with open(new_portdir_ebuild_file) as ifile:
         new_ebuild_content = ifile.read()
@@ -48,7 +55,7 @@ def _keywords_included_in_ebuild(accept_keywords: Iterable[str], old_portdir_ebu
     if not new_ebuild_relevant_keywords:
         return False
 
-    if os.path.exists(old_portdir_ebuild_file):
+    if old_portdir_ebuild_file is not None and os.path.exists(old_portdir_ebuild_file):
         with open(old_portdir_ebuild_file) as ifile:
             old_ebuild_content = ifile.read()
         old_ebuild_relevant_keywords = _get_relevant_keywords_set_for(
@@ -87,8 +94,9 @@ def iterate_new_and_changed_ebuilds(config):
                     continue
 
             # include only specific keywords sets
-            if not _keywords_included_in_ebuild(config.keywords, old_portdir_ebuild_file,
-                                                new_portdir_ebuild_file):
+            if not _keywords_included_in_ebuild(
+                    config.keywords, new_portdir_ebuild_file,
+                    old_portdir_ebuild_file if not config.report_changes else None):
                 continue
 
             version = ebuild_file[len(package + '-'):-len('.ebuild')]
@@ -123,9 +131,16 @@ def parse_command_line(argv):
 
     parser.add_argument('--keywords',
                         help='include only packages/versions/revisions that have these keywords; '
-                        'in case of multiple keywords a space-separated list can be provided; '
-                        'only arch and ~arch syntax are accepted, no special keywords '
+                        'in case of multiple keywords a space-separated list can be provided '
                         '(default: auto-detect using portageq)')
+
+    parser.add_argument('--report-changes',
+                        default=False,
+                        action='store_true',
+                        help='include all ebuilds that have changed between the old and the new '
+                        'portdir and that contain the specified keywords (default: only '
+                        'include changed ebuilds for which keywords have changed too)')
+
     parser.add_argument('old_portdir', metavar='OLD', help='location of old portdir')
     parser.add_argument('new_portdir', metavar='NEW', help='location of new portdir')
 
