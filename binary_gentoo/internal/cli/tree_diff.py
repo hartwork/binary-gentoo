@@ -22,7 +22,16 @@ def _get_relevant_keywords_set_for(ebuild_content: str,
         # we will assume the ebuild needs to be listed
         ebuild_keywords = accept_keywords
     else:
-        ebuild_keywords = match.group('keywords').split(" ")
+        ebuild_keywords = match.group('keywords')
+        ebuild_keywords = ebuild_keywords.split(" ") if ebuild_keywords else []
+
+    # replace special keywords by the relevant keywords from the ebuild
+    if '**' in accept_keywords:
+        accept_keywords = ebuild_keywords
+    elif '*' in accept_keywords:
+        accept_keywords = [kw for kw in ebuild_keywords if kw[0] != '~']
+    elif '~*' in accept_keywords:
+        accept_keywords = [kw for kw in ebuild_keywords if kw[0] == '~']
 
     return set(accept_keywords) & set(ebuild_keywords)
 
@@ -37,7 +46,7 @@ def _keywords_included_in_ebuild(accept_keywords: Iterable[str], old_portdir_ebu
 
     # return False if the new file doesn't include the specified keywords
     if not new_ebuild_relevant_keywords:
-        False
+        return False
 
     if os.path.exists(old_portdir_ebuild_file):
         with open(old_portdir_ebuild_file) as ifile:
@@ -48,7 +57,7 @@ def _keywords_included_in_ebuild(accept_keywords: Iterable[str], old_portdir_ebu
         # return False if both old and new file include the same keywords
         # (i.e., when only other keywords have changed)
         if new_ebuild_relevant_keywords == old_ebuild_relevant_keywords:
-            False
+            return False
 
     # in all other cases, return True
     return True
@@ -95,6 +104,9 @@ def enrich_config(config):
     if config.keywords is None:
         config.keywords = announce_and_check_output(['portageq', 'envvar',
                                                      'ACCEPT_KEYWORDS']).rstrip()
+    if not config.keywords:
+        raise ValueError("At least one keyword must be specified")
+
     config.keywords = config.keywords.split(" ")
 
     return config
