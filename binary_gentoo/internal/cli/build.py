@@ -117,11 +117,14 @@ def parse_command_line(argv):
                         default='/etc/portage',
                         help='enforce specific location for /etc/portage (default: "%(default)s")')
 
-    parser.add_argument('--flavors',
-                        dest='host_flavors_dir',
-                        metavar='DIR',
-                        help=('location of directory containing '
-                              'sparse <category>/<package>/flavors.yml file hierarchy'))
+    parser_group_flavors_or_image = parser.add_mutually_exclusive_group()
+
+    parser_group_flavors_or_image.add_argument(
+        '--flavors',
+        dest='host_flavors_dir',
+        metavar='DIR',
+        help=('location of directory containing '
+              'sparse <category>/<package>/flavors.yml file hierarchy'))
 
     parser.add_argument('--shy-rebuild',
                         dest='enforce_rebuild',
@@ -134,10 +137,11 @@ def parse_command_line(argv):
                         action='store_true',
                         help='enforce installation (default: build but do not install)')
 
-    parser.add_argument('--tag-docker-image',
-                        metavar='IMAGE',
-                        dest='tag_docker_image',
-                        help='create a Docker image from the resulting container')
+    parser_group_flavors_or_image.add_argument(
+        '--tag-docker-image',
+        metavar='IMAGE',
+        dest='tag_docker_image',
+        help='create a Docker image from the resulting container')
 
     parser.add_argument(
         'emerge_target',
