@@ -23,15 +23,15 @@ def _get_relevant_keywords_set_for(ebuild_content: str,
         ebuild_keywords = accept_keywords
     else:
         ebuild_keywords = match.group('keywords')
-        ebuild_keywords = ebuild_keywords.split(" ") if ebuild_keywords else []
+        ebuild_keywords = [kw for kw in ebuild_keywords.split(" ") if kw]
 
     # replace special keywords by the relevant keywords from the ebuild
     if '**' in accept_keywords:
         accept_keywords = ebuild_keywords
     elif '*' in accept_keywords:
-        accept_keywords = [kw for kw in ebuild_keywords if kw[0] != '~']
+        accept_keywords = [kw for kw in ebuild_keywords if not kw.startswith('~')]
     elif '~*' in accept_keywords:
-        accept_keywords = [kw for kw in ebuild_keywords if kw[0] == '~']
+        accept_keywords = [kw for kw in ebuild_keywords if kw.startswith('~')]
 
     return set(accept_keywords) & set(ebuild_keywords)
 
@@ -107,7 +107,9 @@ def enrich_config(config):
     if not config.keywords:
         raise ValueError("At least one keyword must be specified")
 
-    config.keywords = config.keywords.split(" ")
+    # add stable keywords for testing keywords
+    config.keywords = {kw for kw in config.keywords.split(" ") if kw}
+    config.keywords |= {k[1:] for k in config.keywords if k.startswith('~')}
 
     return config
 
