@@ -8,7 +8,7 @@ import sys
 import typing
 from argparse import ArgumentParser
 
-from ..reporter import exception_reporting
+from ..reporter import announce_and_check_output, exception_reporting
 from ._parser import add_version_argument_to
 
 _keywords_pattern = re.compile('KEYWORDS="(?P<keywords>[^"]*)"')
@@ -83,6 +83,13 @@ def report_new_and_changed_ebuilds(config):
         print(cpv)
 
 
+def enrich_config(config):
+    if config.keywords is None:
+        config.keywords = announce_and_check_output(['portageq', 'envvar',
+                                                     'ACCEPT_KEYWORDS']).rstrip()
+    return config
+
+
 def parse_command_line(argv):
     parser = ArgumentParser(
         prog='gentoo-tree-diff',
@@ -109,4 +116,5 @@ def parse_command_line(argv):
 def main():
     with exception_reporting():
         config = parse_command_line(sys.argv)
+        enrich_config(config)
         report_new_and_changed_ebuilds(config)
