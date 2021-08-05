@@ -5,8 +5,8 @@ import filecmp
 import os
 import re
 import sys
-import typing
 from argparse import ArgumentParser
+from typing import Iterable, Set
 
 from ..reporter import announce_and_check_output, exception_reporting
 from ._parser import add_version_argument_to
@@ -14,10 +14,8 @@ from ._parser import add_version_argument_to
 _keywords_pattern = re.compile('KEYWORDS="(?P<keywords>[^"]*)"')
 
 
-def _get_relevant_keywords_set_for(ebuild_content: str, accept_keywords: typing.Iterable) -> set:
-    if isinstance(accept_keywords, str):
-        accept_keywords = accept_keywords.split(" ")
-
+def _get_relevant_keywords_set_for(ebuild_content: str,
+                                   accept_keywords: Iterable[str]) -> Set[str]:
     match = _keywords_pattern.search(ebuild_content)
     if match is None:
         # if the KEYWORDS variable is not found in the ebuild,
@@ -27,6 +25,33 @@ def _get_relevant_keywords_set_for(ebuild_content: str, accept_keywords: typing.
         ebuild_keywords = match.group('keywords').split(" ")
 
     return set(accept_keywords) & set(ebuild_keywords)
+
+
+def _keywords_included_in_ebuild(accept_keywords: Iterable[str], old_portdir_ebuild_file,
+                                 new_portdir_ebuild_file) -> bool:
+
+    with open(new_portdir_ebuild_file) as ifile:
+        new_ebuild_content = ifile.read()
+    new_ebuild_relevant_keywords = _get_relevant_keywords_set_for(new_ebuild_content,
+                                                                  accept_keywords)
+
+    # return False if the new file doesn't include the specified keywords
+    if not new_ebuild_relevant_keywords:
+        False
+
+    if os.path.exists(old_portdir_ebuild_file):
+        with open(old_portdir_ebuild_file) as ifile:
+            old_ebuild_content = ifile.read()
+        old_ebuild_relevant_keywords = _get_relevant_keywords_set_for(
+            old_ebuild_content, accept_keywords)
+
+        # return False if both old and new file include the same keywords
+        # (i.e., when only other keywords have changed)
+        if new_ebuild_relevant_keywords == old_ebuild_relevant_keywords:
+            False
+
+    # in all other cases, return True
+    return True
 
 
 def iterate_new_and_changed_ebuilds(config):
@@ -53,26 +78,9 @@ def iterate_new_and_changed_ebuilds(config):
                     continue
 
             # include only specific keywords sets
-            if config.keywords is not None:
-                with open(new_portdir_ebuild_file) as ifile:
-                    new_ebuild_content = ifile.read()
-                new_ebuild_relevant_keywords = _get_relevant_keywords_set_for(
-                    new_ebuild_content, config.keywords)
-
-                # don't output if the new file doesn't include the specified keywords
-                if not new_ebuild_relevant_keywords:
-                    continue
-
-                if os.path.exists(old_portdir_ebuild_file):
-                    with open(old_portdir_ebuild_file) as ifile:
-                        old_ebuild_content = ifile.read()
-                    old_ebuild_relevant_keywords = _get_relevant_keywords_set_for(
-                        old_ebuild_content, config.keywords)
-
-                    # don't output if both old and new file include the same keywords
-                    # (i.e., when only other keywords have changed)
-                    if new_ebuild_relevant_keywords == old_ebuild_relevant_keywords:
-                        continue
+            if not _keywords_included_in_ebuild(config.keywords, old_portdir_ebuild_file,
+                                                new_portdir_ebuild_file):
+                continue
 
             version = ebuild_file[len(package + '-'):-len('.ebuild')]
             yield f'{category_plus_package}-{version}'
@@ -87,6 +95,8 @@ def enrich_config(config):
     if config.keywords is None:
         config.keywords = announce_and_check_output(['portageq', 'envvar',
                                                      'ACCEPT_KEYWORDS']).rstrip()
+    config.keywords = config.keywords.split(" ")
+
     return config
 
 
