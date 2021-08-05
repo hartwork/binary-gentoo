@@ -137,6 +137,11 @@ def parse_command_line(argv):
                         action='store_true',
                         help='enforce installation (default: build but do not install)')
 
+    parser.add_argument('--update',
+                        default=False,
+                        action='store_true',
+                        help='pass --update to emerge (default: execute emerge without --update)')
+
     parser_group_flavors_or_image.add_argument(
         '--tag-docker-image',
         metavar='IMAGE',
@@ -181,6 +186,14 @@ def build(config):
         '--with-bdeps=y',
         '--complete-graph',
     ]
+    if config.update:
+        emerge_args += [
+            '--update',
+            '--changed-use',
+            '--newuse',
+            '--deep',
+        ]
+
     features_flat = ' '.join([
         '-news',
         'binpkg-multi-instance',
@@ -316,10 +329,13 @@ def build(config):
                 enforce_installation = config.enforce_installation or not is_last_step or (
                     config.tag_docker_image is not None)
                 install_or_not = '' if enforce_installation else '--buildpkgonly'
-                step_commands += [
-                    f'{emerge_quoted_flat} --usepkg=y --onlydeps --verbose-conflicts {shlex.quote(config.emerge_target)}',  # noqa: E501
-                    f'{emerge_quoted_flat} {rebuild_or_not} {install_or_not} {shlex.quote(config.emerge_target)}',  # noqa: E501
-                ]
+                if not config.update:
+                    step_commands.append(
+                        f'{emerge_quoted_flat} --usepkg=y --onlydeps --verbose-conflicts {shlex.quote(config.emerge_target)}'  # noqa: E501
+                    )
+                step_commands.append(
+                    f'{emerge_quoted_flat} {rebuild_or_not} {install_or_not} {shlex.quote(config.emerge_target)}'  # noqa: E501
+                )
 
             if container_name is not None:
                 # Cleanup symlinks that were created in previous steps, otherwise subsequent
