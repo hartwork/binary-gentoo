@@ -22,58 +22,28 @@ def _replace_special_keywords_for_ebuild(accept_keywords: Set[str],
         accept_keywords |= ebuild_keywords
     elif '*' in accept_keywords:
         accept_keywords.remove('*')
-        accept_keywords |= [kw for kw in ebuild_keywords if not kw.startswith('~')]
+        accept_keywords |= {kw for kw in ebuild_keywords if not kw.startswith('~')}
     elif '~*' in accept_keywords:
         accept_keywords.remove('~*')
-        accept_keywords |= [kw for kw in ebuild_keywords if kw.startswith('~')]
+        accept_keywords |= {kw for kw in ebuild_keywords if kw.startswith('~')}
     return accept_keywords
 
 
-def _get_relevant_keywords_set_for(ebuild_content: str, accept_keywords: Set[str]) -> Set[str]:
+def _get_relevant_keywords_set_for(ebuild_file: str, accept_keywords: Set[str]) -> Set[str]:
+    with open(ebuild_file) as ifile:
+        ebuild_content = ifile.read()
+
     match = _keywords_pattern.search(ebuild_content)
     if match is None:
-        ebuild_keywords = []
+        ebuild_keywords = set()
     else:
         ebuild_keywords = match.group('keywords')
-        ebuild_keywords = [kw for kw in ebuild_keywords.split(" ") if kw]
+        ebuild_keywords = {kw for kw in ebuild_keywords.split(" ") if kw}
 
     accept_keywords = _replace_special_keywords_for_ebuild(accept_keywords, ebuild_keywords)
 
     return set(accept_keywords) & set(ebuild_keywords)
 
-
-def _keywords_included_in_ebuild(accept_keywords: Iterable[str],
-                                 new_portdir_ebuild_file: str,
-                                 old_portdir_ebuild_file: str = None) -> bool:
-    """
-    Check if the new_portdir_ebuild_file contains the accept_keywords. Returns True if that is the
-    case, otherwise False. If old_portdir_ebuild_file is passed, an extra comparison is made
-    between the relevant keywords in the old and the new ebuild. If these keywords are identical,
-    return False.
-    """
-
-    with open(new_portdir_ebuild_file) as ifile:
-        new_ebuild_content = ifile.read()
-    new_ebuild_relevant_keywords = _get_relevant_keywords_set_for(new_ebuild_content,
-                                                                  accept_keywords)
-
-    # return False if the new file doesn't include the specified keywords
-    if not new_ebuild_relevant_keywords:
-        return False
-
-    if old_portdir_ebuild_file is not None and os.path.exists(old_portdir_ebuild_file):
-        with open(old_portdir_ebuild_file) as ifile:
-            old_ebuild_content = ifile.read()
-        old_ebuild_relevant_keywords = _get_relevant_keywords_set_for(
-            old_ebuild_content, accept_keywords)
-
-        # return False if both old and new file include the same keywords
-        # (i.e., when only other keywords have changed)
-        if new_ebuild_relevant_keywords == old_ebuild_relevant_keywords:
-            return False
-
-    # in all other cases, return True
-    return True
 
 
 def iterate_new_and_changed_ebuilds(config):
@@ -99,11 +69,20 @@ def iterate_new_and_changed_ebuilds(config):
                 if filecmp.cmp(old_portdir_ebuild_file, new_portdir_ebuild_file):
                     continue
 
-            # include only specific keywords sets
-            if not _keywords_included_in_ebuild(
-                    config.keywords, new_portdir_ebuild_file,
-                    old_portdir_ebuild_file if not config.report_changes else None):
+            # don't output if the new ebuild doesn't contain the accept keywords
+            new_ebuild_relevant_keywords = _get_relevant_keywords_set_for(
+                new_portdir_ebuild_file, config.keywords)
+            if not new_ebuild_relevant_keywords:
                 continue
+
+            # don't output if both old and new file include the same keywords
+            # unless the user has asked for all changes
+            # (i.e., when only other keywords have changed)
+            if not config.report_changes and os.path.exists(old_portdir_ebuild_file):
+                old_ebuild_relevant_keywords = _get_relevant_keywords_set_for(
+                    old_portdir_ebuild_file, config.keywords)
+                if new_ebuild_relevant_keywords == old_ebuild_relevant_keywords:
+                    continue
 
             version = ebuild_file[len(package + '-'):-len('.ebuild')]
             yield f'{category_plus_package}-{version}'
