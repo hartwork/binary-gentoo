@@ -19,15 +19,25 @@ class MainTest(TestCase):
             pass
 
     @staticmethod
+    def _create_file_with_keywords(filename, keywords):
+        os.makedirs(os.path.dirname(filename), exist_ok=True)
+        with open(filename, 'w') as ofile:
+            ofile.write(f'KEYWORDS="{" ".join(keywords)}"')
+
+    @staticmethod
     def _sort_lines(text):
         return '\n'.join(sorted(text.split('\n')))
 
     def test_success(self):
         with TemporaryDirectory() as old_portdir, TemporaryDirectory() as new_portdir:
-            self._create_empty_file(os.path.join(old_portdir, 'cat', 'pkg', 'pkg-123.ebuild'))
-            self._create_empty_file(os.path.join(new_portdir, 'cat', 'pkg', 'pkg-123.ebuild'))
-            self._create_empty_file(os.path.join(new_portdir, 'cat', 'pkg', 'pkg-456.ebuild'))
-            self._create_empty_file(os.path.join(new_portdir, 'cat', 'other', 'other-789.ebuild'))
+            self._create_file_with_keywords(
+                os.path.join(old_portdir, 'cat', 'pkg', 'pkg-123.ebuild'), {'x86', '~amd64'})
+            self._create_file_with_keywords(
+                os.path.join(new_portdir, 'cat', 'pkg', 'pkg-123.ebuild'), {'x86', '~amd64'})
+            self._create_file_with_keywords(
+                os.path.join(new_portdir, 'cat', 'pkg', 'pkg-456.ebuild'), {'x86', '~amd64'})
+            self._create_file_with_keywords(
+                os.path.join(new_portdir, 'cat', 'other', 'other-789.ebuild'), {'x86', '~amd64'})
 
             argv = ['gentoo-tree-diff', '--keywords', '**', old_portdir, new_portdir]
             expected_stdout = dedent("""\
