@@ -29,7 +29,7 @@ class MainTest(TestCase):
             self._create_empty_file(os.path.join(new_portdir, 'cat', 'pkg', 'pkg-456.ebuild'))
             self._create_empty_file(os.path.join(new_portdir, 'cat', 'other', 'other-789.ebuild'))
 
-            argv = ['gentoo-tree-diff', '--keywords', '"**"', old_portdir, new_portdir]
+            argv = ['gentoo-tree-diff', '--keywords', '**', old_portdir, new_portdir]
             expected_stdout = dedent("""\
                 cat/pkg-456
                 cat/other-789
