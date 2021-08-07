@@ -12,6 +12,7 @@ from ..reporter import announce_and_check_output, exception_reporting
 from ._parser import add_version_argument_to
 
 _keywords_pattern = re.compile('KEYWORDS="(?P<keywords>[^"]*)"')
+_filename_9999_pattern = re.compile(r'9999(\-r[0-9]+)?\.ebuild$')
 
 
 def _replace_special_keywords_for_ebuild(accept_keywords: Set[str],
@@ -90,7 +91,7 @@ def iterate_new_and_changed_ebuilds(config):
             new_portdir_ebuild_file = os.path.join(root, ebuild_file)
 
             # don't output 9999 ebuilds
-            if ebuild_file.endswith('-9999.ebuild'):
+            if re.search(_filename_9999_pattern, ebuild_file) is not None:
                 continue
 
             # don't output if files are identical
