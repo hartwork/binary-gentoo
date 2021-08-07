@@ -14,8 +14,21 @@ from ._parser import add_version_argument_to
 _keywords_pattern = re.compile('KEYWORDS="(?P<keywords>[^"]*)"')
 
 
-def _get_relevant_keywords_set_for(ebuild_content: str,
-                                   accept_keywords: Iterable[str]) -> Set[str]:
+def _replace_special_keywords_for_ebuild(accept_keywords: Set[str],
+                                         ebuild_keywords: Set[str]) -> Set[str]:
+    if '**' in accept_keywords:
+        accept_keywords.remove('**')
+        accept_keywords |= ebuild_keywords
+    elif '*' in accept_keywords:
+        accept_keywords.remove('*')
+        accept_keywords |= [kw for kw in ebuild_keywords if not kw.startswith('~')]
+    elif '~*' in accept_keywords:
+        accept_keywords.remove('~*')
+        accept_keywords |= [kw for kw in ebuild_keywords if kw.startswith('~')]
+    return accept_keywords
+
+
+def _get_relevant_keywords_set_for(ebuild_content: str, accept_keywords: Set[str]) -> Set[str]:
     match = _keywords_pattern.search(ebuild_content)
     if match is None:
         ebuild_keywords = []
@@ -23,13 +36,7 @@ def _get_relevant_keywords_set_for(ebuild_content: str,
         ebuild_keywords = match.group('keywords')
         ebuild_keywords = [kw for kw in ebuild_keywords.split(" ") if kw]
 
-    # replace special keywords by the relevant keywords from the ebuild
-    if '**' in accept_keywords:
-        accept_keywords = ebuild_keywords
-    elif '*' in accept_keywords:
-        accept_keywords = [kw for kw in ebuild_keywords if not kw.startswith('~')]
-    elif '~*' in accept_keywords:
-        accept_keywords = [kw for kw in ebuild_keywords if kw.startswith('~')]
+    accept_keywords = _replace_special_keywords_for_ebuild(accept_keywords, ebuild_keywords)
 
     return set(accept_keywords) & set(ebuild_keywords)
 
