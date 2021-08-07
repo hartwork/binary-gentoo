@@ -18,9 +18,7 @@ def _get_relevant_keywords_set_for(ebuild_content: str,
                                    accept_keywords: Iterable[str]) -> Set[str]:
     match = _keywords_pattern.search(ebuild_content)
     if match is None:
-        # if the KEYWORDS variable is not found in the ebuild,
-        # we will assume the ebuild needs to be listed
-        ebuild_keywords = accept_keywords
+        ebuild_keywords = []
     else:
         ebuild_keywords = match.group('keywords')
         ebuild_keywords = [kw for kw in ebuild_keywords.split(" ") if kw]
