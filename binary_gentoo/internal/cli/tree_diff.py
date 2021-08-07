@@ -6,7 +6,7 @@ import os
 import re
 import sys
 from argparse import ArgumentParser
-from typing import Iterable, Set
+from typing import Set
 
 from ..reporter import announce_and_check_output, exception_reporting
 from ._parser import add_version_argument_to
@@ -43,7 +43,6 @@ def _get_relevant_keywords_set_for(ebuild_file: str, accept_keywords: Set[str]) 
     accept_keywords = _replace_special_keywords_for_ebuild(accept_keywords, ebuild_keywords)
 
     return set(accept_keywords) & set(ebuild_keywords)
-
 
 
 def iterate_new_and_changed_ebuilds(config):
