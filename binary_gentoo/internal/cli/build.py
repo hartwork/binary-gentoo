@@ -10,17 +10,24 @@ import shutil
 import subprocess
 import sys
 import tempfile
+import uuid
 from argparse import ArgumentParser
 from contextlib import suppress
+from enum import Enum, auto
 
 import yaml
 
-from ..atoms import ATOM_LIKE_DISPLAY, extract_category_package_from
+from ..atoms import ATOM_LIKE_DISPLAY, SET_DISPLAY, extract_category_package_from, extract_set_from
 from ..reporter import announce_and_call, announce_and_check_output, exception_reporting
 from ._enrich import enrich_host_distdir_of, enrich_host_pkgdir_of, enrich_host_portdir_of
 from ._parser import (add_distdir_argument_to, add_docker_image_argument_to,
                       add_interactive_argument_to, add_pkgdir_argument_to, add_portdir_argument_to,
                       add_version_argument_to)
+
+
+class EmergeTargetType(Enum):
+    PACKAGE = auto()
+    SET = auto()
 
 
 def determine_host_gentoo_profile():
@@ -73,6 +80,8 @@ def parse_command_line(argv):
         help='enforce Gentoo profile PROFILE'
         ' (e.g. "default/linux/amd64/17.1/developer", default: auto-detect using eselect)')
 
+    parser.add_argument('--use', help='custom one-off use flags (default: none)')
+
     parser.add_argument('--makeopts',
                         metavar='MAKEOPTS',
                         default='-j1',
@@ -108,11 +117,14 @@ def parse_command_line(argv):
                         default='/etc/portage',
                         help='enforce specific location for /etc/portage (default: "%(default)s")')
 
-    parser.add_argument('--flavors',
-                        dest='host_flavors_dir',
-                        metavar='DIR',
-                        help=('location of directory containing '
-                              'sparse <category>/<package>/flavors.yml file hierarchy'))
+    parser_group_flavors_or_image = parser.add_mutually_exclusive_group()
+
+    parser_group_flavors_or_image.add_argument(
+        '--flavors',
+        dest='host_flavors_dir',
+        metavar='DIR',
+        help=('location of directory containing '
+              'sparse <category>/<package>/flavors.yml file hierarchy'))
 
     parser.add_argument('--shy-rebuild',
                         dest='enforce_rebuild',
@@ -125,11 +137,37 @@ def parse_command_line(argv):
                         action='store_true',
                         help='enforce installation (default: build but do not install)')
 
-    parser.add_argument('atom',
-                        metavar='ATOM',
-                        help=f'Package atom (format "{ATOM_LIKE_DISPLAY}")')
+    parser.add_argument('--update',
+                        default=False,
+                        action='store_true',
+                        help='pass --update to emerge (default: execute emerge without --update)')
+
+    parser_group_flavors_or_image.add_argument(
+        '--tag-docker-image',
+        metavar='IMAGE',
+        dest='tag_docker_image',
+        help='create a Docker image from the resulting container')
+
+    parser.add_argument(
+        'emerge_target',
+        metavar='CP|CPV|=CPV|@SET',
+        help=f'Package atom or set (format "{ATOM_LIKE_DISPLAY}" or "{SET_DISPLAY}")')
 
     return parser.parse_args(argv[1:])
+
+
+def classify_emerge_target(emerge_target):
+    try:
+        emerge_target_type = EmergeTargetType.PACKAGE
+        category, package_or_set = extract_category_package_from(emerge_target)
+    except ValueError as package_error:
+        try:
+            emerge_target_type = EmergeTargetType.SET
+            category, package_or_set = 'sets', extract_set_from(emerge_target)
+        except ValueError as set_error:
+            raise ValueError(f'{package_error}; {set_error}')
+
+    return emerge_target_type, category, package_or_set
 
 
 def build(config):
@@ -148,6 +186,14 @@ def build(config):
         '--with-bdeps=y',
         '--complete-graph',
     ]
+    if config.update:
+        emerge_args += [
+            '--update',
+            '--changed-use',
+            '--newuse',
+            '--deep',
+        ]
+
     features_flat = ' '.join([
         '-news',
         'binpkg-multi-instance',
@@ -176,27 +222,37 @@ def build(config):
         f'LDFLAGS={shlex.quote(config.ldflags)}',
     ]
 
+    if config.use is not None:
+        emerge_env.append(f'USE={shlex.quote(config.use)}')
+
+    if config.tag_docker_image is not None:
+        container_name = f'binary-gentoo-{uuid.uuid4().hex}'
+    else:
+        container_name = None
+
     emerge = ['env'] + emerge_env + ['emerge'] + emerge_args
     emerge_quoted_flat = ' '.join(emerge)
     rebuild_or_not = f'--usepkg={"n" if config.enforce_rebuild else "y"}'
 
     container_profile_dir = os.path.join(container_portdir, 'profiles', config.gentoo_profile)
+    container_portdir_dir_link_target = '/var/db/repos/gentoo'
+    container_make_profile = '/etc/make.profile'
     container_command_shared_prefix = [
-        f'ln -s {shlex.quote(container_portdir)} /var/db/repos/gentoo',
+        f'ln -s {shlex.quote(container_portdir)} {shlex.quote(container_portdir_dir_link_target)}',
         'set -x',
 
         # This is to avoid access to potentially missing link /etc/portage/make.profile .
         # We cannot run "eselect profile set <profile>" because
         # that would create /etc/portage/make.profile rather than /etc/make.profile .
-        f'ln -f -s {shlex.quote(container_profile_dir)} /etc/make.profile',
+        f'ln -f -s {shlex.quote(container_profile_dir)} {shlex.quote(container_make_profile)}',  # noqa: E501
     ]
 
-    # Create pretend log dir
-    category, package = extract_category_package_from(config.atom)
-    host_pretend_logdir = os.path.join(config.host_logdir, 'binary-gentoo')
-    host_pretend_logdir_category = os.path.join(host_pretend_logdir, category)
-    host_pretend_logdir_category_package = os.path.join(host_pretend_logdir_category, package)
-    os.makedirs(host_pretend_logdir_category_package, mode=0o700, exist_ok=True)
+    # Create log dir
+    emerge_target_type, category, package_or_set = classify_emerge_target(config.emerge_target)
+    host_logdir__root = os.path.join(config.host_logdir, 'binary-gentoo')
+    host_logdir__category = os.path.join(host_logdir__root, category)
+    host_logdir__category__package = os.path.join(host_logdir__category, package_or_set)
+    os.makedirs(host_logdir__category__package, mode=0o700, exist_ok=True)
 
     with tempfile.TemporaryDirectory() as eventual_etc_portage:
         rsync_argv = [
@@ -216,11 +272,12 @@ def build(config):
                     'ZZ-global')  # to be third last in alphabetic order
                 shutil.copyfile(global_package_use_file_source, global_package_use_file_target)
 
-            flavors_yml_file = os.path.join(config.host_flavors_dir, category, package,
-                                            'flavors.yml')
-            with suppress(OSError), open(flavors_yml_file) as f:
-                # TODO validate flavors.yml file content
-                flavors_yml_doc = yaml.safe_load(f)
+            if emerge_target_type == EmergeTargetType.PACKAGE:
+                flavors_yml_file = os.path.join(config.host_flavors_dir, category, package_or_set,
+                                                'flavors.yml')
+                with suppress(OSError), open(flavors_yml_file) as f:
+                    # TODO validate flavors.yml file content
+                    flavors_yml_doc = yaml.safe_load(f)
 
         # Write package.use level "common to all flavors", 2 of 4
         common_package_use_file_content = flavors_yml_doc.get('package.use')
@@ -245,10 +302,10 @@ def build(config):
 
             filename_timestamp = str(datetime.datetime.now()).replace(' ', '-').replace(
                 ':', '-').replace('.', '-')
-            pretend_fail_log_filename = os.path.join(host_pretend_logdir_category_package,
-                                                     filename_timestamp + '-fail.log')
-            pretend_log_writer_process = subprocess.Popen(['tee', pretend_fail_log_filename],
-                                                          stdin=subprocess.PIPE)
+            host_log_filename = os.path.join(host_logdir__category__package,
+                                             filename_timestamp + '-fail.log')
+            log_writer_process = subprocess.Popen(['tee', host_log_filename],
+                                                  stdin=subprocess.PIPE)
 
             # Assemble build command list
             steps = flavor.get('steps', [{}])
@@ -269,17 +326,34 @@ def build(config):
                     step_commands.append(f'rm -f {flavor_package_use_file}')  # from previous step
                     prior_step_package_use_file_exists = False
 
-                install_or_not = ('' if (config.enforce_installation or not is_last_step) else
-                                  '--buildpkgonly')
+                enforce_installation = config.enforce_installation or not is_last_step or (
+                    config.tag_docker_image is not None)
+                install_or_not = '' if enforce_installation else '--buildpkgonly'
+                if not config.update:
+                    step_commands.append(
+                        f'{emerge_quoted_flat} --usepkg=y --onlydeps --verbose-conflicts {shlex.quote(config.emerge_target)}'  # noqa: E501
+                    )
+                step_commands.append(
+                    f'{emerge_quoted_flat} {rebuild_or_not} {install_or_not} {shlex.quote(config.emerge_target)}'  # noqa: E501
+                )
+
+            if container_name is not None:
+                # Cleanup symlinks that were created in previous steps, otherwise subsequent
+                # builds with --tag-docker-image will fail when the same symlinks are re-created
                 step_commands += [
-                    f'{emerge_quoted_flat} --usepkg=y --onlydeps --verbose-conflicts {shlex.quote(config.atom)}',  # noqa: E501
-                    f'{emerge_quoted_flat} {rebuild_or_not} {install_or_not} {shlex.quote(config.atom)}',  # noqa: E501
+                    f'rm {shlex.quote(container_portdir_dir_link_target)}',
+                    f'rm {shlex.quote(container_make_profile)}',
                 ]
 
             container_command_flat = ' && '.join(step_commands)
 
+            if config.tag_docker_image is not None:
+                docker_container_lifecycle_arg = f'--name={container_name}'
+            else:
+                docker_container_lifecycle_arg = '--rm'
+
             docker_run_args = [
-                '--rm',
+                docker_container_lifecycle_arg,
                 '-v',
                 f'{eventual_etc_portage}:/etc/portage:rw',
                 '-v',
@@ -301,14 +375,21 @@ def build(config):
 
             try:
                 announce_and_call(['docker', 'run'] + docker_run_args,
-                                  stdout=pretend_log_writer_process.stdin)
-                os.remove(pretend_fail_log_filename)
+                                  stdout=log_writer_process.stdin)
+                os.remove(host_log_filename)
                 with suppress(OSError):
-                    os.rmdir(host_pretend_logdir_category_package)
-                    os.rmdir(host_pretend_logdir_category)
+                    os.rmdir(host_logdir__category__package)
+                    os.rmdir(host_logdir__category)
+
+                if config.tag_docker_image is not None:
+                    announce_and_call(
+                        ['docker', 'commit', container_name, config.tag_docker_image])
             finally:
-                pretend_log_writer_process.stdin.close()
-                pretend_log_writer_process.wait()
+                log_writer_process.stdin.close()
+                log_writer_process.wait()
+
+                if config.tag_docker_image is not None:
+                    announce_and_call(['docker', 'rm', container_name])
 
 
 def main():
