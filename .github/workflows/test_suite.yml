@@ -37,7 +37,8 @@ jobs:
             coverage \
             freezegun \
             parameterized \
-            pytest
+            pytest \
+            PyYAML
 
       - name: Run Python test suite
         run: |-
