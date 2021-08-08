@@ -376,7 +376,8 @@ def build(config):
             try:
                 announce_and_call(['docker', 'run'] + docker_run_args,
                                   stdout=log_writer_process.stdin)
-                os.remove(host_log_filename)
+                with suppress(FileNotFoundError):
+                    os.remove(host_log_filename)
                 with suppress(OSError):
                     os.rmdir(host_logdir__category__package)
                     os.rmdir(host_logdir__category)
