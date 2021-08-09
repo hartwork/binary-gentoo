@@ -80,7 +80,11 @@ class PriorityQueue:
 
         with suppress(FileNotFoundError):
             with open(filename) as f:
-                doc = json.load(f)
+                content = f.read()
+                if not content:
+                    return muq
+
+            doc = json.loads(content)
 
             # TODO proper validation
             assert doc['version'] == 1
