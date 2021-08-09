@@ -63,7 +63,7 @@ class PriorityQueue:
         try:
             prority, _, atom = heapq.heappop(self._min_heap)
         except IndexError:
-            raise IndexError('All queues are empty')
+            raise IndexError('Queue is empty')
         del self._priority_of[atom]
         return atom, prority
 
