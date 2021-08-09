@@ -8,26 +8,26 @@ from argparse import ArgumentParser
 from ..atoms import ATOM_LIKE_DISPLAY
 from ..fs_lock import file_based_interprocess_locking
 from ..json_formatter import dump_json_for_humans
-from ..priority_queue import MultiQueue
+from ..priority_queue import PriorityQueue
 from ..reporter import exception_reporting
 from ._parser import add_version_argument_to
 
 
 def run_drop(config):
-    muq = MultiQueue.load(config.state_filename)
+    muq = PriorityQueue.load(config.state_filename)
     muq.drop(config.atoms)
     muq.save(config.state_filename)
 
 
 def run_push(config):
-    muq = MultiQueue.load(config.state_filename)
+    muq = PriorityQueue.load(config.state_filename)
     for atom in config.atoms:
         muq.push(config.priority, atom)
     muq.save(config.state_filename)
 
 
 def run_pop(config):
-    muq = MultiQueue.load(config.state_filename)
+    muq = PriorityQueue.load(config.state_filename)
     atom, priority = muq.pop()
     muq.save(config.state_filename)
 
@@ -41,7 +41,7 @@ def run_pop(config):
 
 
 def run_show(config):
-    muq = MultiQueue.load(config.state_filename)
+    muq = PriorityQueue.load(config.state_filename)
     for priority_plus_atom in muq:
         priority, atom = priority_plus_atom
         print(priority, atom)
