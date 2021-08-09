@@ -33,12 +33,18 @@ class _ReadableCalledProcessError(CalledProcessError):
 
 
 @contextmanager
+def _readable_called_process_errors():
+    try:
+        yield
+    except CalledProcessError as e:
+        raise _ReadableCalledProcessError(e.returncode, e.cmd, e.output, e.stderr)
+
+
+@contextmanager
 def exception_reporting():
     try:
-        try:
+        with _readable_called_process_errors():
             yield
-        except CalledProcessError as e:
-            raise _ReadableCalledProcessError(e.returncode, e.cmd, e.output, e.stderr)
     except KeyboardInterrupt:
         sys.exit(128 + signal.SIGINT)
     except Exception as e:
