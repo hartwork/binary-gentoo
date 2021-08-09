@@ -14,22 +14,22 @@ from ._parser import add_version_argument_to
 
 
 def run_drop(config):
-    muq = PriorityQueue.load(config.state_filename)
-    muq.drop(config.atoms)
-    muq.save(config.state_filename)
+    q = PriorityQueue.load(config.state_filename)
+    q.drop(config.atoms)
+    q.save(config.state_filename)
 
 
 def run_push(config):
-    muq = PriorityQueue.load(config.state_filename)
+    q = PriorityQueue.load(config.state_filename)
     for atom in config.atoms:
-        muq.push(config.priority, atom)
-    muq.save(config.state_filename)
+        q.push(config.priority, atom)
+    q.save(config.state_filename)
 
 
 def run_pop(config):
-    muq = PriorityQueue.load(config.state_filename)
-    atom, priority = muq.pop()
-    muq.save(config.state_filename)
+    q = PriorityQueue.load(config.state_filename)
+    atom, priority = q.pop()
+    q.save(config.state_filename)
 
     doc = {
         'atom': atom,
@@ -41,8 +41,8 @@ def run_pop(config):
 
 
 def run_show(config):
-    muq = PriorityQueue.load(config.state_filename)
-    for priority_plus_atom in muq:
+    q = PriorityQueue.load(config.state_filename)
+    for priority_plus_atom in q:
         priority, atom = priority_plus_atom
         print(priority, atom)
 

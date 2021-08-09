@@ -76,23 +76,23 @@ class PriorityQueue:
 
     @staticmethod
     def load(filename):
-        muq = PriorityQueue()
+        q = PriorityQueue()
 
         with suppress(FileNotFoundError):
             with open(filename) as f:
                 content = f.read()
                 if not content:
-                    return muq
+                    return q
 
             doc = json.loads(content)
 
             # TODO proper validation
             assert doc['version'] == 1
-            muq._min_heap = doc['min_heap']
-            muq._priority_of = doc['priority_of']
-            muq._push_count = doc['push_count']
+            q._min_heap = doc['min_heap']
+            q._priority_of = doc['priority_of']
+            q._push_count = doc['push_count']
 
-        return muq
+        return q
 
     def save(self, filename):
         doc = {
