@@ -71,6 +71,9 @@ class PriorityQueue:
         for item in heapq.nsmallest(len(self._min_heap), self._min_heap):
             yield item[0], item[2]
 
+    def __len__(self):
+        return len(self._min_heap)
+
     @staticmethod
     def load(filename):
         muq = PriorityQueue()
