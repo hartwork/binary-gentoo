@@ -12,7 +12,7 @@ from ..reporter import announce_and_check_output, exception_reporting
 from ._parser import add_version_argument_to
 
 _keywords_pattern = re.compile('KEYWORDS="(?P<keywords>[^"]*)"')
-_filename_9999_pattern = re.compile(r'9999(\-r[0-9]+)?\.ebuild$')
+_filename_9999_pattern = re.compile(r'9999(-r[0-9]+)?\.ebuild$')
 
 
 def _replace_special_keywords_for_ebuild(accept_keywords: Set[str],
