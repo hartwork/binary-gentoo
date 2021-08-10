@@ -13,12 +13,6 @@ from ..tree_diff import main
 
 class MainTest(TestCase):
     @staticmethod
-    def _create_empty_file(filename):
-        os.makedirs(os.path.dirname(filename), exist_ok=True)
-        with open(filename, 'w'):
-            pass
-
-    @staticmethod
     def _create_file_with_keywords(filename, keywords):
         os.makedirs(os.path.dirname(filename), exist_ok=True)
         with open(filename, 'w') as ofile:
