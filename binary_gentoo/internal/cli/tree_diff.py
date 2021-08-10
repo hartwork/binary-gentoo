@@ -76,7 +76,7 @@ def iterate_new_and_changed_ebuilds(config):
 
             # don't output if both old and new file include the same keywords
             # unless the user has asked for all changes
-            # (i.e., when only other keywords have changed)
+            # (i.e., when unrelated keywords or other parts of the ebuild have changed)
             if not config.report_changes and os.path.exists(old_portdir_ebuild_file):
                 old_ebuild_relevant_keywords = _get_relevant_keywords_set_for(
                     old_portdir_ebuild_file, config.keywords)
