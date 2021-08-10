@@ -29,8 +29,8 @@ def _replace_special_keywords_for_ebuild(accept_keywords: Set[str],
     return accept_keywords
 
 
-def _get_relevant_keywords_set_for(ebuild_file: str, accept_keywords: Set[str]) -> Set[str]:
-    with open(ebuild_file) as ifile:
+def _get_relevant_keywords_set_for(ebuild_filepath: str, accept_keywords: Set[str]) -> Set[str]:
+    with open(ebuild_filepath) as ifile:
         ebuild_content = ifile.read()
 
     match = _keywords_pattern.search(ebuild_content)
@@ -55,31 +55,31 @@ def iterate_new_and_changed_ebuilds(config):
         package = category_plus_package.split(os.sep)[-1]
 
         for ebuild_file in ebuild_files:
-            old_portdir_ebuild_file = os.path.join(config.old_portdir, category_plus_package,
-                                                   ebuild_file)
-            new_portdir_ebuild_file = os.path.join(root, ebuild_file)
+            old_portdir_ebuild_filepath = os.path.join(config.old_portdir, category_plus_package,
+                                                       ebuild_file)
+            new_portdir_ebuild_filepath = os.path.join(root, ebuild_file)
 
             # don't output 9999 ebuilds
             if re.search(_filename_9999_pattern, ebuild_file) is not None:
                 continue
 
             # don't output if files are identical
-            if os.path.exists(old_portdir_ebuild_file):
-                if filecmp.cmp(old_portdir_ebuild_file, new_portdir_ebuild_file):
+            if os.path.exists(old_portdir_ebuild_filepath):
+                if filecmp.cmp(old_portdir_ebuild_filepath, new_portdir_ebuild_filepath):
                     continue
 
             # don't output if the new ebuild doesn't contain the accept keywords
             new_ebuild_relevant_keywords = _get_relevant_keywords_set_for(
-                new_portdir_ebuild_file, config.keywords)
+                new_portdir_ebuild_filepath, config.keywords)
             if not new_ebuild_relevant_keywords:
                 continue
 
             # don't output if both old and new file include the same keywords
             # unless the user has asked for all changes
             # (i.e., when unrelated keywords or other parts of the ebuild have changed)
-            if not config.report_changes and os.path.exists(old_portdir_ebuild_file):
+            if not config.report_changes and os.path.exists(old_portdir_ebuild_filepath):
                 old_ebuild_relevant_keywords = _get_relevant_keywords_set_for(
-                    old_portdir_ebuild_file, config.keywords)
+                    old_portdir_ebuild_filepath, config.keywords)
                 if new_ebuild_relevant_keywords == old_ebuild_relevant_keywords:
                     continue
 
