@@ -77,7 +77,7 @@ def iterate_new_and_changed_ebuilds(config):
             # don't output if both old and new file include the same keywords
             # unless the user has asked for all changes
             # (i.e., when unrelated keywords or other parts of the ebuild have changed)
-            if not config.report_changes and os.path.exists(old_portdir_ebuild_filepath):
+            if not config.pessimistic and os.path.exists(old_portdir_ebuild_filepath):
                 old_ebuild_relevant_keywords = _get_relevant_keywords_set_for(
                     old_portdir_ebuild_filepath, config.keywords)
                 if new_ebuild_relevant_keywords == old_ebuild_relevant_keywords:
@@ -118,12 +118,12 @@ def parse_command_line(argv):
                         'in case of multiple keywords a space-separated list can be provided '
                         '(default: auto-detect using portageq)')
 
-    parser.add_argument('--report-changes',
+    parser.add_argument('--pessimistic',
                         default=False,
                         action='store_true',
-                        help='include all ebuilds that have changed between the old and the new '
-                        'portdir and that contain the specified keywords (default: only '
-                        'include changed ebuilds for which keywords have changed too)')
+                        help='be more robust towards missing revbumps by including ebuilds '
+                        'that had non-keyword content changes (default: only include previously '
+                        'existing ebuilds when relevant keywords have been added)')
 
     parser.add_argument('old_portdir', metavar='OLD', help='location of old portdir')
     parser.add_argument('new_portdir', metavar='NEW', help='location of new portdir')
