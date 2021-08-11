@@ -5,7 +5,6 @@ import filecmp
 import os
 import re
 import sys
-import time
 from argparse import ArgumentParser
 from typing import Set
 
