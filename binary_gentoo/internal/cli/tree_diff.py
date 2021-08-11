@@ -5,6 +5,7 @@ import filecmp
 import os
 import re
 import sys
+import time
 from argparse import ArgumentParser
 from typing import Set
 
@@ -21,10 +22,10 @@ def _replace_special_keywords_for_ebuild(accept_keywords: Set[str],
     if '**' in effective_keywords:
         effective_keywords.remove('**')
         effective_keywords |= ebuild_keywords
-    elif '*' in effective_keywords:
+    if '*' in effective_keywords:
         effective_keywords.remove('*')
         effective_keywords |= {kw for kw in ebuild_keywords if not kw.startswith('~')}
-    elif '~*' in effective_keywords:
+    if '~*' in effective_keywords:
         effective_keywords.remove('~*')
         effective_keywords |= {kw for kw in ebuild_keywords if kw.startswith('~')}
     return effective_keywords
@@ -65,6 +66,8 @@ def iterate_new_and_changed_ebuilds(config):
                 continue
 
             # don't output if files are identical
+            # old_portdir_ebuild_filepath_exists = os.path.exists(old_portdir_ebuild_filepath)
+            # if old_portdir_ebuild_filepath_exists:
             if os.path.exists(old_portdir_ebuild_filepath):
                 if filecmp.cmp(old_portdir_ebuild_filepath, new_portdir_ebuild_filepath):
                     continue
@@ -78,6 +81,7 @@ def iterate_new_and_changed_ebuilds(config):
             # don't output if both old and new file include the same keywords
             # unless the user has asked for all changes
             # (i.e., when unrelated keywords or other parts of the ebuild have changed)
+            # if not config.pessimistic and old_portdir_ebuild_filepath_exists:
             if not config.pessimistic and os.path.exists(old_portdir_ebuild_filepath):
                 old_ebuild_relevant_keywords = _get_relevant_keywords_set_for(
                     old_portdir_ebuild_filepath, config.keywords)
@@ -141,4 +145,6 @@ def main():
     with exception_reporting():
         config = parse_command_line(sys.argv)
         enrich_config(config)
+        x = time.perf_counter()
         report_new_and_changed_ebuilds(config)
+        print(f"Elapsed: {time.perf_counter()-x}")
