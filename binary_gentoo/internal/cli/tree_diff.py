@@ -17,16 +17,17 @@ _filename_9999_pattern = re.compile(r'9999(-r[0-9]+)?\.ebuild$')
 
 def _replace_special_keywords_for_ebuild(accept_keywords: Set[str],
                                          ebuild_keywords: Set[str]) -> Set[str]:
-    if '**' in accept_keywords:
-        accept_keywords.remove('**')
-        accept_keywords |= ebuild_keywords
-    elif '*' in accept_keywords:
-        accept_keywords.remove('*')
-        accept_keywords |= {kw for kw in ebuild_keywords if not kw.startswith('~')}
-    elif '~*' in accept_keywords:
-        accept_keywords.remove('~*')
-        accept_keywords |= {kw for kw in ebuild_keywords if kw.startswith('~')}
-    return accept_keywords
+    effective_keywords = set(accept_keywords)
+    if '**' in effective_keywords:
+        effective_keywords.remove('**')
+        effective_keywords |= ebuild_keywords
+    elif '*' in effective_keywords:
+        effective_keywords.remove('*')
+        effective_keywords |= {kw for kw in ebuild_keywords if not kw.startswith('~')}
+    elif '~*' in effective_keywords:
+        effective_keywords.remove('~*')
+        effective_keywords |= {kw for kw in ebuild_keywords if kw.startswith('~')}
+    return effective_keywords
 
 
 def _get_relevant_keywords_set_for(ebuild_filepath: str, accept_keywords: Set[str]) -> Set[str]:
