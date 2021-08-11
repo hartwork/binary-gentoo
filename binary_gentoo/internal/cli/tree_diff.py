@@ -145,6 +145,4 @@ def main():
     with exception_reporting():
         config = parse_command_line(sys.argv)
         enrich_config(config)
-        x = time.perf_counter()
         report_new_and_changed_ebuilds(config)
-        print(f"Elapsed: {time.perf_counter()-x}")
