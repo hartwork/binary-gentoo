@@ -26,6 +26,7 @@ and are meant to be combined using a glue language like Bash:
 - `gentoo-local-queue` – Manages simple file-based push/pop build task queues
 - `gentoo-packages` — Do operations on pkgdir (other than `emaint --fix binhost`)
 - `gentoo-tree-diff` – Lists packages/versions/revisions that one portdir has over another
+- `gentoo-tree-sync` – Brings a given portdir directory (and its backup) up to date
 
 **binary-gentoo**
 is software libre licensed under the `GNU Affero GPL version 3 or later` license.
@@ -65,7 +66,7 @@ a virtual machine with…
   that works for *both* the producing machine and the consuming machine(s)
   and ideally [resolve-march-native](https://github.com/hartwork/resolve-march-native)
   installed — more on finding the ideal flags below
-- Two portdir copies — one synced with some form of `git pull`,
+- Two portdir copies — one synced with `gentoo-tree-sync` (or some form of `git pull`),
   the other brought back in sync using `rsync` after a call to `gentoo-tree-diff`
 - A glue script that…
   - respects your inclusion list
