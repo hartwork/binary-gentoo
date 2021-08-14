@@ -11,6 +11,10 @@ _tests_require = [
 ]
 
 _extras_require = {
+    'ci': [
+        'coverage',
+        'pytest',
+    ],
     'tests': _tests_require,
 }
 
