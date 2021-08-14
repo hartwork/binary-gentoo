@@ -1,0 +1,21 @@
+# Direct runtime dependencies (from setup.py section "install_requires")
+PyYAML==5.4.1
+
+# Test dependencies (from setup.py section "tests_require" or "extras_require['tests']")
+freezegun==1.1.0
+parameterized==0.8.1
+
+# CI dependencies (from setup.py section "extras_require['ci']")
+coverage==5.5
+pytest==6.2.4
+
+# Combined indirect dependencies
+attrs==21.2.0
+iniconfig==1.1.1
+packaging==21.0
+pluggy==0.13.1
+py==1.10.0
+pyparsing==2.4.7
+python-dateutil==2.8.2
+six==1.16.0
+toml==0.10.2

@@ -5,6 +5,19 @@ from setuptools import find_packages, setup
 
 from binary_gentoo.internal.version import VERSION_STR
 
+_tests_require = [
+    'freezegun',
+    'parameterized',
+]
+
+_extras_require = {
+    'ci': [
+        'coverage',
+        'pytest',
+    ],
+    'tests': _tests_require,
+}
+
 if __name__ == '__main__':
     setup(
         name='binary-gentoo',
@@ -23,10 +36,8 @@ if __name__ == '__main__':
         install_requires=[
             'PyYAML',
         ],
-        tests_require=[
-            'freezegun',
-            'parameterized',
-        ],
+        extras_require=_extras_require,
+        tests_require=_tests_require,
         packages=find_packages(),
         entry_points={
             'console_scripts': [
