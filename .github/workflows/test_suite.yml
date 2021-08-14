@@ -33,12 +33,8 @@ jobs:
             --disable-pip-version-check \
             --ignore-installed \
             pip setuptools wheel
-          pip install \
-            coverage \
-            freezegun \
-            parameterized \
-            pytest \
-            PyYAML
+          pip install -e .[tests,ci]
+          pip uninstall --yes binary-gentoo
 
       - name: Run Python test suite
         run: |-
