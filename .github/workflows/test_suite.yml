@@ -35,6 +35,7 @@ jobs:
             pip setuptools wheel
           pip install -e .[tests,ci]
           pip uninstall --yes binary-gentoo
+          diff -u0 <(pip freeze | sort -f) <(sed -e '/^#/d' -e '/^$/d' requirements.txt | sort -f)
 
       - name: Run Python test suite
         run: |-
