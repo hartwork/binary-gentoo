@@ -8,7 +8,26 @@ from textwrap import dedent
 from unittest import TestCase
 from unittest.mock import patch
 
-from ..tree_diff import main
+from parameterized import parameterized
+
+from ..tree_diff import _replace_special_keywords_for_ebuild, main
+
+
+class ReplaceSpecialKeywordsTest(TestCase):
+    @parameterized.expand([
+        ('no ops', {'one', '~two'}, {'three', '~four'}, {'one', '~two'}),
+        ('star op', {'one', '~two', '*'}, {'three', '~four'}, {'one', '~two', 'three'}),
+        ('tilde star op', {'one', '~two', '~*'}, {'three', '~four'}, {'one', '~two', '~four'}),
+        ('double star op', {'one', '~two', '**'}, {'three',
+                                                   '~four'}, {'one', '~two', 'three', '~four'}),
+        ('start op + tilde star op', {'one', '~two', '*',
+                                      '~*'}, {'three', '~four'}, {'one', '~two', 'three',
+                                                                  '~four'}),
+    ])
+    def test(self, _, accept_keywords, ebuild_keywords, expected_effective_keywords):
+        actual_effective_keywords = _replace_special_keywords_for_ebuild(
+            accept_keywords, ebuild_keywords)
+        self.assertEqual(actual_effective_keywords, expected_effective_keywords)
 
 
 class MainTest(TestCase):
