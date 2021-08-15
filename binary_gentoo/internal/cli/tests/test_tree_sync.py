@@ -2,6 +2,7 @@
 # Licensed under GNU Affero GPL version 3 or later
 
 from dataclasses import dataclass
+from io import StringIO
 from subprocess import call
 from tempfile import TemporaryDirectory
 from typing import List
@@ -28,7 +29,8 @@ class MainTest(TestCase):
                 argv += ['--backup-to', temp_portdir_old]
             argv.append(temp_portdir_new)
 
-            with patch('sys.argv', argv), patch('subprocess.check_call') as check_call_mock:
+            with patch('sys.argv', argv), patch('subprocess.check_call') as check_call_mock, \
+                    patch('sys.stdout', StringIO()):
                 main()
 
             return RunRecord(call_args_list=check_call_mock.call_args_list, )

@@ -168,7 +168,7 @@ class RunDeleteTest(TestCase):
             )
 
             time_mock = Mock(return_value=float(now_epoch_seconds))
-            with patch('time.time', time_mock):
+            with patch('time.time', time_mock), patch('sys.stdout', StringIO()):
                 run_delete(config_mock)
 
             with open(os.path.join(tempdir, 'Packages')) as f:
@@ -245,6 +245,7 @@ class MainTest(TestCase):
     def test_list_failure_empty_directory(self):  # just something that touches beyond argparse
         with TemporaryDirectory() as tempdir:
             argv = ['gentoo-packages', '--pkgdir', tempdir, 'list']
-            with patch('sys.argv', argv), self.assertRaises(SystemExit) as catcher:
+            with patch('sys.argv', argv), patch('sys.stderr', StringIO()), \
+                    self.assertRaises(SystemExit) as catcher:
                 main()
             self.assertEqual(catcher.exception.args, (1, ))  # i.e. error

@@ -56,7 +56,8 @@ class EnrichConfigTest(TestCase):
 
     def test_not_given__auto_detection(self):
         config = parse_command_line(['gentoo-tree-diff', 'dir1', 'dir2'])
-        with patch('subprocess.check_output', self._fake_subprocess_check_output):
+        with patch('subprocess.check_output', self._fake_subprocess_check_output), \
+                patch('sys.stdout', StringIO()):
             enrich_config(config)
         self.assertEqual(config.keywords, {'one', 'two', '~*'})
 

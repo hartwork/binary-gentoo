@@ -2,6 +2,7 @@
 # Licensed under GNU Affero GPL version 3 or later
 
 import os.path
+from io import StringIO
 from unittest import TestCase
 from unittest.mock import Mock, patch
 
@@ -49,7 +50,8 @@ class EnrichTest(TestCase):
         config_mock = Mock(**{attribute: None})
         expected_path = os.path.abspath(magic_relative_filename)
 
-        with patch('subprocess.check_output', self._fake_portageq):
+        with patch('subprocess.check_output',
+                   self._fake_portageq), patch('sys.stdout', StringIO()):
             getter(config_mock)
 
         actual_path = getattr(config_mock, attribute)

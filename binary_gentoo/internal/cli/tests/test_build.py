@@ -2,6 +2,7 @@
 # Licensed under GNU Affero GPL version 3 or later
 
 from dataclasses import dataclass
+from io import StringIO
 from tempfile import TemporaryDirectory
 from textwrap import dedent
 from typing import List
@@ -68,7 +69,8 @@ class EnrichConfigTest(TestCase):
     def test_portagq_interaction(self):
         config = parse_command_line(['gentoo-build', 'cat/pkg'])
 
-        with patch('subprocess.check_output', self._fake_subprocess_check_output):
+        with patch('subprocess.check_output', self._fake_subprocess_check_output), \
+                patch('sys.stdout', StringIO()):
             enrich_config(config)
 
         self.assertEqual(config.gentoo_profile, self.magic_profile)
@@ -112,7 +114,8 @@ class MainTest(TestCase):
                 '=cat/pkg-123',
             ]
 
-            with patch('sys.argv', argv), patch('subprocess.check_call') as check_call_mock:
+            with patch('sys.argv', argv), patch('subprocess.check_call') as check_call_mock, \
+                    patch('sys.stdout', StringIO()):
                 main()
 
             return RunRecord(call_args_list=check_call_mock.call_args_list, )

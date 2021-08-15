@@ -2,6 +2,7 @@
 # Licensed under GNU Affero GPL version 3 or later
 
 from dataclasses import dataclass
+from io import StringIO
 from itertools import product
 from tempfile import TemporaryDirectory
 from typing import List
@@ -42,7 +43,8 @@ class MainTest(TestCase):
             if not interactive:
                 argv.append('--non-interactive')
 
-            with patch('sys.argv', argv), patch('subprocess.check_call') as check_call_mock:
+            with patch('sys.argv', argv), patch('subprocess.check_call') as check_call_mock, \
+                    patch('sys.stdout', StringIO()):
                 main()
 
             return RunRecord(
