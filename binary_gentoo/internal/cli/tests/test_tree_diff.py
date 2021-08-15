@@ -10,7 +10,8 @@ from unittest.mock import patch
 
 from parameterized import parameterized
 
-from ..tree_diff import _replace_special_keywords_for_ebuild, main
+from ..tree_diff import (_replace_special_keywords_for_ebuild, enrich_config, main,
+                         parse_command_line)
 
 
 class ReplaceSpecialKeywordsTest(TestCase):
@@ -28,6 +29,35 @@ class ReplaceSpecialKeywordsTest(TestCase):
         actual_effective_keywords = _replace_special_keywords_for_ebuild(
             accept_keywords, ebuild_keywords)
         self.assertEqual(actual_effective_keywords, expected_effective_keywords)
+
+
+class EnrichConfigTest(TestCase):
+    magic_keywords = 'one two ~*'
+
+    @classmethod
+    def _fake_subprocess_check_output(cls, argv):
+        if argv == ['portageq', 'envvar', 'ACCEPT_KEYWORDS']:
+            stdout = cls.magic_keywords
+        else:
+            stdout = f'Hello from: {" ".join(argv)}'
+        return (stdout + '\n').encode('ascii')
+
+    def test_given__empty(self):
+        config = parse_command_line(['gentoo-tree-diff', '--keywords', '', 'dir1', 'dir2'])
+        with self.assertRaises(ValueError):
+            enrich_config(config)
+
+    def test_given__not_empty(self):
+        config = parse_command_line(
+            ['gentoo-tree-diff', '--keywords', 'one    ~two *', 'dir1', 'dir2'])
+        enrich_config(config)
+        self.assertEqual(config.keywords, {'one', 'two', '~two', '*'})
+
+    def test_not_given__auto_detection(self):
+        config = parse_command_line(['gentoo-tree-diff', 'dir1', 'dir2'])
+        with patch('subprocess.check_output', self._fake_subprocess_check_output):
+            enrich_config(config)
+        self.assertEqual(config.keywords, {'one', 'two', '~*'})
 
 
 class MainTest(TestCase):
