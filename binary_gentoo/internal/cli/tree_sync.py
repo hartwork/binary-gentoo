@@ -103,7 +103,3 @@ def main():
     with exception_reporting():
         config = parse_command_line(sys.argv)
         sync(config)
-
-
-if __name__ == '__main__':
-    main()

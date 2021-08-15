@@ -105,7 +105,7 @@ def enrich_config(config):
 
     # add stable keywords for testing keywords
     config.keywords = {kw for kw in config.keywords.split(" ") if kw}
-    config.keywords |= {k[1:] for k in config.keywords if k.startswith('~')}
+    config.keywords |= {k[1:] for k in config.keywords if k.startswith('~') and not k == '~*'}
 
     return config
 
