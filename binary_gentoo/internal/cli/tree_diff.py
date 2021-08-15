@@ -68,7 +68,9 @@ def iterate_new_and_changed_ebuilds(config):
             # old_portdir_ebuild_filepath_exists = os.path.exists(old_portdir_ebuild_filepath)
             # if old_portdir_ebuild_filepath_exists:
             if os.path.exists(old_portdir_ebuild_filepath):
-                if filecmp.cmp(old_portdir_ebuild_filepath, new_portdir_ebuild_filepath):
+                if filecmp.cmp(old_portdir_ebuild_filepath,
+                               new_portdir_ebuild_filepath,
+                               shallow=False):
                     continue
 
             # don't output if the new ebuild doesn't contain the accept keywords
