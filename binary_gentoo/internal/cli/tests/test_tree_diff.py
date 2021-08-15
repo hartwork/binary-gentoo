@@ -95,8 +95,6 @@ class IterateNewAndChangedEbuildsTest(TestCase):
             if extra_content is not None:
                 print(extra_content, file=f)
             f.flush()
-        with open(filename) as f:
-            print('CONTENT', f.read())
 
     def test_new_live_ebuild_ignored_by_filename(self):
         keywords = 'one'
