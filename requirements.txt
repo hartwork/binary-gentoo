@@ -1,5 +1,5 @@
 # Direct runtime dependencies (from setup.py section "install_requires")
-PyYAML==5.4.1
+PyYAML==6.0
 
 # Test dependencies (from setup.py section "tests_require" or "extras_require['tests']")
 freezegun==1.1.0
