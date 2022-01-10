@@ -239,6 +239,7 @@ def build(config):
     container_make_profile = '/etc/make.profile'
     container_command_shared_prefix = [
         f'ln -s {shlex.quote(container_portdir)} {shlex.quote(container_portdir_dir_link_target)}',
+        'mkdir -p -m 0775 /run/lock',  # needed by e.g. pkg_postinst of app-text/docbook-xml-dtd
         'set -x',
 
         # This is to avoid access to potentially missing link /etc/portage/make.profile .
