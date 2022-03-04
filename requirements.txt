@@ -2,7 +2,7 @@
 PyYAML==6.0
 
 # Test dependencies (from setup.py section "tests_require" or "extras_require['tests']")
-freezegun==1.1.0
+freezegun==1.2.0
 parameterized==0.8.1
 
 # CI dependencies (from setup.py section "extras_require['ci']")
