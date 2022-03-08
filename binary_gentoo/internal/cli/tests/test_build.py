@@ -21,6 +21,7 @@ class RunRecord:
 
 
 class ClassifyEmergeTargetTest(TestCase):
+
     @parameterized.expand([
         ('cat/pkg', (EmergeTargetType.PACKAGE, 'cat', 'pkg')),
         ('cat/pkg-123', (EmergeTargetType.PACKAGE, 'cat', 'pkg')),
@@ -81,6 +82,7 @@ class EnrichConfigTest(TestCase):
 
 
 class MainTest(TestCase):
+
     @staticmethod
     def _run_gentoo_build_with_subprocess_mocked(argv_extra: List[str] = None) -> RunRecord:
         if argv_extra is None:

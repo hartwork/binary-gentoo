@@ -9,6 +9,7 @@ from binary_gentoo.internal.json_formatter import dump_json_for_humans
 
 
 class DumpJsonForHumansTest(TestCase):
+
     def test_healthy_formatting(self):
         doc = {
             'k1': 'v1',

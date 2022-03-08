@@ -11,6 +11,7 @@ from ..reporter import (_readable_called_process_errors, _ReadableCalledProcessE
 
 
 class ReadableCalledProcessErrorsTest(TestCase):
+
     def test_called_process_error_is_made_more_readable(self):
         with self.assertRaises(_ReadableCalledProcessError) as catcher:
             with _readable_called_process_errors():
@@ -21,6 +22,7 @@ class ReadableCalledProcessErrorsTest(TestCase):
 
 
 class ExceptionReportingTest(TestCase):
+
     def test_keyboard_interrupt_exits_with_code_130(self):
         with self.assertRaises(SystemExit) as catcher:
             with exception_reporting():

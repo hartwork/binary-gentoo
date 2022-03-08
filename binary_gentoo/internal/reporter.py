@@ -25,6 +25,7 @@ def announce_and_check_output(argv):
 
 
 class _ReadableCalledProcessError(CalledProcessError):
+
     def __str__(self):
         flat_quoted_cmd = ' '.join(shlex.quote(s) for s in self.cmd)
         with patch.object(self, 'cmd', 'X'):
