@@ -5,7 +5,7 @@ name: Detect outdated pre-commit hooks
 
 on:
   schedule:
-    - cron: '40 23 * * 2'  # Every Tuesday 23:40 UTC
+    - cron: '0 16 * * 5'  # Every Friday 4pm
 
 # NOTE: This will drop all permissions from GITHUB_TOKEN except metadata read,
 #       and then (re)add the ones listed below:
