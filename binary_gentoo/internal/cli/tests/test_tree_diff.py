@@ -16,6 +16,7 @@ from ..tree_diff import (_replace_special_keywords_for_ebuild, enrich_config,
 
 
 class ReplaceSpecialKeywordsTest(TestCase):
+
     @parameterized.expand([
         ('no ops', {'one', '~two'}, {'three', '~four'}, {'one', '~two'}),
         ('star op', {'one', '~two', '*'}, {'three', '~four'}, {'one', '~two', 'three'}),
@@ -63,6 +64,7 @@ class EnrichConfigTest(TestCase):
 
 
 class IterateNewAndChangedEbuildsTest(TestCase):
+
     @classmethod
     @contextmanager
     def _tempdir_config(
@@ -175,6 +177,7 @@ class IterateNewAndChangedEbuildsTest(TestCase):
 
 
 class MainTest(TestCase):
+
     @staticmethod
     def _create_file_with_keywords(filename, keywords):
         os.makedirs(os.path.dirname(filename), exist_ok=True)

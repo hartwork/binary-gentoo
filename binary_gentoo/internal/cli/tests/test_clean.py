@@ -23,6 +23,7 @@ class RunRecord:
 
 
 class MainTest(TestCase):
+
     @staticmethod
     def _run_gentoo_clean_with_subprocess_mocked(pretend=False, interactive=True) -> RunRecord:
         with TemporaryDirectory() as temp_distdir,\

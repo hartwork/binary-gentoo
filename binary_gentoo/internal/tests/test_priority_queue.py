@@ -12,6 +12,7 @@ from ..priority_queue import PriorityQueue
 
 
 class PushTest(TestCase):
+
     def test_sorted_by_priority(self):
         q = PriorityQueue()
         q.push(1.0, 'cat/pkg-one')
@@ -41,6 +42,7 @@ class PushTest(TestCase):
 
 
 class PopTest(TestCase):
+
     def test_empty(self):
         with self.assertRaises(IndexError) as catcher:
             PriorityQueue().pop()
@@ -60,6 +62,7 @@ class PopTest(TestCase):
 
 
 class DropTest(TestCase):
+
     def test_existing__success(self):
         q = PriorityQueue()
         q.push(1.0, 'cat/pkg-one')

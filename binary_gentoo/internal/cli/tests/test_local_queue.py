@@ -19,6 +19,7 @@ class RunRecord:
 
 
 class MainTest(TestCase):
+
     def setUp(self) -> None:
         self._state_file = NamedTemporaryFile().__enter__()
 

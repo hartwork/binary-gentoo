@@ -60,6 +60,7 @@ class ParsePackageBlockTest(TestCase):
 
 
 class AdjustIndexFileHeaderTest(TestCase):
+
     def test_replacement(self):
         original_dummy_header = dedent("""\
             PACKAGES: 758
@@ -81,6 +82,7 @@ class AdjustIndexFileHeaderTest(TestCase):
 
 
 class HasSafePackagePathTest(TestCase):
+
     @parameterized.expand([
         ('cat/pkg/pkg-123-1.xpak', True, 'healthy .xpak'),
         ('cat/pkg-123.tbz2', True, 'healthy .tbz2'),
@@ -94,6 +96,7 @@ class HasSafePackagePathTest(TestCase):
 
 
 class ReadPackagesIndexFileTest(TestCase):
+
     def test_success(self):
         expected_header = 'K1: v1'
         expected_packages_blocks = ['K2: v2', 'K3: v3', '']
@@ -114,6 +117,7 @@ class ReadPackagesIndexFileTest(TestCase):
 
 
 class RunDeleteTest(TestCase):
+
     @staticmethod
     def _create_empty_file(filename):
         os.makedirs(os.path.dirname(filename))
@@ -186,6 +190,7 @@ class RunDeleteTest(TestCase):
 
 
 class RunListTest(TestCase):
+
     @staticmethod
     def _run_list_with_config(config):
         with patch('sys.stdout', StringIO()) as stdout_mock:
@@ -230,6 +235,7 @@ class RunListTest(TestCase):
 
 
 class MainTest(TestCase):
+
     @parameterized.expand([
         ('gentoo-packages', '--help'),
         ('gentoo-packages', 'delete', '--help'),

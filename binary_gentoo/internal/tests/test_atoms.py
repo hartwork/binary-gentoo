@@ -9,6 +9,7 @@ from ..atoms import extract_category_package_from
 
 
 class ExtractCategoryPackageFromTest(TestCase):
+
     @parameterized.expand([
         ('dev-util/meld', 'dev-util', 'meld'),
         ('dev-util/meld-3.20.3-r1', 'dev-util', 'meld'),

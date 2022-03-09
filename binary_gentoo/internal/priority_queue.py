@@ -11,6 +11,7 @@ from .json_formatter import dump_json_for_humans
 
 
 class PriorityQueue:
+
     def __init__(self):
         self._push_count = 0
         self._min_heap = []
