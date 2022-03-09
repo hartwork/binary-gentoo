@@ -13,7 +13,7 @@ jobs:
   build_and_test:
     strategy:
       matrix:
-        python-version: [3.8, 3.9]  # oldest and most recent version supported
+        python-version: [3.8, '3.10']  # oldest and most recent version supported
     name: Run Python test suite
     runs-on: ubuntu-20.04
     steps:
