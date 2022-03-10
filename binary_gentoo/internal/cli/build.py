@@ -374,9 +374,11 @@ def build(config):
             if config.interactive:
                 docker_run_args = ['-it'] + docker_run_args
 
+            delete_log = False
             try:
                 announce_and_call(['docker', 'run'] + docker_run_args,
                                   stdout=log_writer_process.stdin)
+                delete_log = True
 
                 if config.tag_docker_image is not None:
                     announce_and_call(
@@ -385,11 +387,11 @@ def build(config):
                 log_writer_process.stdin.close()
                 log_writer_process.wait()
 
-                with suppress(FileNotFoundError):
-                    os.remove(host_log_filename)
-                with suppress(OSError):
-                    os.rmdir(host_logdir__category__package)
-                    os.rmdir(host_logdir__category)
+                if delete_log:
+                    with suppress(OSError):
+                        os.remove(host_log_filename)
+                        os.rmdir(host_logdir__category__package)
+                        os.rmdir(host_logdir__category)
 
                 if config.tag_docker_image is not None:
                     announce_and_call(['docker', 'rm', container_name])
