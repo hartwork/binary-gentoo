@@ -148,6 +148,11 @@ def parse_command_line(argv):
         dest='tag_docker_image',
         help='create a Docker image from the resulting container')
 
+    parser.add_argument('--fail-to-shell',
+                        dest='fail_to_shell',
+                        action='store_true',
+                        help='drop into an in-container Bash shell on failure')
+
     parser.add_argument(
         'emerge_target',
         metavar='CP|CPV|=CPV|@SET',
@@ -337,6 +342,11 @@ def build(config):
                 step_commands.append(
                     f'{emerge_quoted_flat} {rebuild_or_not} {install_or_not} {shlex.quote(config.emerge_target)}'  # noqa: E501
                 )
+
+            if config.fail_to_shell:
+                success_chain_flat = ' && '.join(step_commands)
+                step_commands = [f'{{ {{ {success_chain_flat} ; }} || {{ bash -i ; }} ; }}']
+                del success_chain_flat
 
             if container_name is not None:
                 # Cleanup symlinks that were created in previous steps, otherwise subsequent
