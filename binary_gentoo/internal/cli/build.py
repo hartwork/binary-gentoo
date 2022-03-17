@@ -365,6 +365,8 @@ def build(config):
 
             docker_run_args = [
                 docker_container_lifecycle_arg,
+                '--mount',
+                'destination=/run,type=tmpfs,readonly=false,tmpfs-mode=755',
                 '-v',
                 f'{eventual_etc_portage}:/etc/portage:rw',
                 '-v',
