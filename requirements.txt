@@ -6,7 +6,7 @@ freezegun==1.2.1
 parameterized==0.8.1
 
 # CI dependencies (from setup.py section "extras_require['ci']")
-coverage==6.4.1
+coverage==6.4.2
 pytest==7.1.2
 
 # Combined indirect dependencies
