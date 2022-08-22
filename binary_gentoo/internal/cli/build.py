@@ -95,11 +95,10 @@ def parse_command_line(argv):
     parser.add_argument('--ldflags',
                         metavar='LDFLAGS',
                         help='enforce custom LDFLAGS (default: auto-detect using portageq)')
-    parser.add_argument(
-        '--cpu-flags-x86',
-        metavar='FLAGS',
-        help=
-        'enforce custom CPU_FLAGS_X86 (default: auto-detect using portageq (not cpuid2cpuflags))')
+    parser.add_argument('--cpu-flags-x86',
+                        metavar='FLAGS',
+                        help='enforce custom CPU_FLAGS_X86'
+                        ' (default: auto-detect using portageq (not cpuid2cpuflags))')
 
     add_portdir_argument_to(parser)
     add_pkgdir_argument_to(parser)
