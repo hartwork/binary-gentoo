@@ -13,9 +13,9 @@ jobs:
   build_and_test:
     strategy:
       matrix:
-        python-version: [3.8, '3.10']  # oldest and most recent version supported
+        python-version: [3.8, 3.11]  # oldest and most recent version supported
     name: Run Python test suite
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - uses: actions/checkout@v3.1.0
 
@@ -35,7 +35,9 @@ jobs:
             pip setuptools wheel
           pip install -r requirements.txt
           pip check
-          diff -u0 <(pip freeze | sort -f) <(sed -e '/^#/d' -e '/^$/d' requirements.txt | sort -f)
+          diff -u0 \
+            <(sed -e '/^#/d' -e '/^$/d' requirements.txt | sort -f) \
+            <(pip freeze | sort -f)
 
       - name: Run Python test suite
         run: |-
