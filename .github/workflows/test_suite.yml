@@ -35,7 +35,9 @@ jobs:
             pip setuptools wheel
           pip install -r requirements.txt
           pip check
-          diff -u0 <(pip freeze | sort -f) <(sed -e '/^#/d' -e '/^$/d' requirements.txt | sort -f)
+          diff -u0 \
+            <(sed -e '/^#/d' -e '/^$/d' requirements.txt | sort -f) \
+            <(pip freeze | sort -f)
 
       - name: Run Python test suite
         run: |-
