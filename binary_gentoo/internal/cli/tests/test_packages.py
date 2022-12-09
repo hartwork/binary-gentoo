@@ -44,6 +44,10 @@ class ParsePackageBlockTest(TestCase):
         CPV: cat/pkg-123
         PATH: cat/pkg/pkg-123-1.xpak
     """)
+    _DUMMY_PACKAGE_BLOCK_WITHOUT_BLOCK_ID = dedent("""\
+        BUILD_TIME: 123
+        CPV: cat/pkg-123
+    """)
 
     def test_extraction(self):
         package = parse_package_block(self._REALISTIC_PACKAGE_BLOCK_WITHOUT_PATH)
@@ -58,6 +62,10 @@ class ParsePackageBlockTest(TestCase):
     def test_missing_path_inferred(self):
         package = parse_package_block(self._DUMMY_PACKAGE_BLOCK_WITH_PATH)
         self.assertEqual(package.path, 'cat/pkg/pkg-123-1.xpak')
+
+    def test_missing_build_id(self):
+        package = parse_package_block(self._DUMMY_PACKAGE_BLOCK_WITHOUT_BLOCK_ID)
+        self.assertEqual(package.path, 'cat/pkg-123.tbz2')
 
 
 class AdjustIndexFileHeaderTest(TestCase):
