@@ -217,6 +217,7 @@ def build(config):
         'EMERGE_DEFAULT_OPTS=',  # so that we win over /etc/portage/make.conf
         f'FEATURES={shlex.quote(features_flat)}',
         f'PORTDIR={shlex.quote(container_portdir)}',
+        f'DISTDIR={shlex.quote(container_distdir)}',
         'PORTAGE_ELOG_SYSTEM=save',  # i.e. enforce that log are written to disk
         'PORTAGE_ELOG_CLASSES=',  # i.e. nothing but build logs
         f'PORTAGE_LOGDIR={shlex.quote(container_logdir)}',
