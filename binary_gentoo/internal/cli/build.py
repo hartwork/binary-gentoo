@@ -177,6 +177,7 @@ def classify_emerge_target(emerge_target):
 def build(config):
     cpu_threads_to_use = max(1, len(os.sched_getaffinity(0)) + 1)
     container_portdir = '/usr/portage'
+    container_distdir = '/var/cache/distfiles'
     container_logdir = '/var/log/portage/'
 
     emerge_args = [
@@ -375,7 +376,7 @@ def build(config):
                 '-v',
                 f'{config.host_pkgdir}:/var/cache/binpkgs:rw',
                 '-v',
-                f'{config.host_distdir}:/var/cache/distfiles:rw',
+                f'{config.host_distdir}:{container_distdir}:rw',
                 config.docker_image,
                 'sh',
                 '-c',
