@@ -177,6 +177,7 @@ def classify_emerge_target(emerge_target):
 def build(config):
     cpu_threads_to_use = max(1, len(os.sched_getaffinity(0)) + 1)
     container_portdir = '/usr/portage'
+    container_distdir = '/var/cache/distfiles'
     container_logdir = '/var/log/portage/'
 
     emerge_args = [
@@ -216,6 +217,7 @@ def build(config):
         'EMERGE_DEFAULT_OPTS=',  # so that we win over /etc/portage/make.conf
         f'FEATURES={shlex.quote(features_flat)}',
         f'PORTDIR={shlex.quote(container_portdir)}',
+        f'DISTDIR={shlex.quote(container_distdir)}',
         'PORTAGE_ELOG_SYSTEM=save',  # i.e. enforce that log are written to disk
         'PORTAGE_ELOG_CLASSES=',  # i.e. nothing but build logs
         f'PORTAGE_LOGDIR={shlex.quote(container_logdir)}',
@@ -375,7 +377,7 @@ def build(config):
                 '-v',
                 f'{config.host_pkgdir}:/var/cache/binpkgs:rw',
                 '-v',
-                f'{config.host_distdir}:/var/cache/distfiles:rw',
+                f'{config.host_distdir}:{container_distdir}:rw',
                 config.docker_image,
                 'sh',
                 '-c',
