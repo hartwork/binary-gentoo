@@ -35,8 +35,13 @@ def parse_package_block(package_block: str) -> BinaryPackage:
         key, value = line.split(': ', maxsplit=1)
         d[key] = value
 
+    try:
+        full_name = f'{d["CPV"]}-{d["BUILD_ID"]}'
+    except KeyError:  # for FEATURES=-binpkg-multi-instance
+        full_name = d["CPV"]
+
     return BinaryPackage(
-        full_name=f'{d["CPV"]}-{d["BUILD_ID"]}',
+        full_name=full_name,
         build_time=int(d['BUILD_TIME']),
         cpv=d['CPV'],
         path=d.get('PATH', f'{d["CPV"]}.tbz2'),  # for FEATURES=-binpkg-multi-instance
