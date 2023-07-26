@@ -68,8 +68,8 @@ def clean_packages(config):
         eclean_dist_command.append('--pretend')
         eclean_pkg_command.append('--pretend')
 
-    container_command_flat = ' && '.join(' '.join(shlex.quote(e) for e in argv)
-                                         for argv in (eclean_pkg_command, eclean_dist_command))
+    container_command_flat = ' && '.join(
+        shlex.join(argv) for argv in (eclean_pkg_command, eclean_dist_command))
 
     docker_run_args = [
         '--rm',
