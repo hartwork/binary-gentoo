@@ -11,7 +11,7 @@ from unittest.mock import patch
 
 
 def _announce_command(argv):
-    print('# ' + ' '.join(shlex.quote(a) for a in argv))
+    print('# ' + shlex.join(argv))
 
 
 def announce_and_call(argv, stdout=None):
@@ -27,7 +27,7 @@ def announce_and_check_output(argv):
 class _ReadableCalledProcessError(CalledProcessError):
 
     def __str__(self):
-        flat_quoted_cmd = ' '.join(shlex.quote(s) for s in self.cmd)
+        flat_quoted_cmd = shlex.join(self.cmd)
         with patch.object(self, 'cmd', 'X'):
             res = super().__str__().replace("Command 'X'", f'Command "{flat_quoted_cmd}"')
         return res

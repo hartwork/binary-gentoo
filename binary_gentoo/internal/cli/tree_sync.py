@@ -67,7 +67,7 @@ def sync(config):
             _with_trailing_slash(container_portdir),
             _with_trailing_slash(container_backup_portdir),
         ]
-        rsync_command = ' '.join(shlex.quote(a) for a in rsync_argv)
+        rsync_command = shlex.join(rsync_argv)
         container_command.append(rsync_command)
 
     container_command += [
