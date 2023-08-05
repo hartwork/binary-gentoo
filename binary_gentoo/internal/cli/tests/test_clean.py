@@ -26,8 +26,8 @@ class MainTest(TestCase):
 
     @staticmethod
     def _run_gentoo_clean_with_subprocess_mocked(pretend=False, interactive=True) -> RunRecord:
-        with TemporaryDirectory() as temp_distdir,\
-                TemporaryDirectory() as temp_pkgdir,\
+        with TemporaryDirectory() as temp_distdir, \
+                TemporaryDirectory() as temp_pkgdir, \
                 TemporaryDirectory() as temp_portdir:
             argv = [
                 'gentoo-clean',

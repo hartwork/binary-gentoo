@@ -23,7 +23,7 @@ class MainTest(TestCase):
 
     @staticmethod
     def _run_gentoo_tree_sync_with_subprocess_mocked(backup: bool) -> RunRecord:
-        with TemporaryDirectory() as temp_portdir_old,\
+        with TemporaryDirectory() as temp_portdir_old, \
                 TemporaryDirectory() as temp_portdir_new:
             argv = ['gentoo-tree-sync']
             if backup:
