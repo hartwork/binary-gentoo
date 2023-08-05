@@ -88,8 +88,8 @@ class MainTest(TestCase):
         if argv_extra is None:
             argv_extra = []
 
-        with TemporaryDirectory() as temp_distdir,\
-                TemporaryDirectory() as temp_pkgdir,\
+        with TemporaryDirectory() as temp_distdir, \
+                TemporaryDirectory() as temp_pkgdir, \
                 TemporaryDirectory() as temp_portdir, \
                 TemporaryDirectory() as temp_logdir:
             argv = [
