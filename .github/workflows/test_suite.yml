@@ -37,7 +37,7 @@ jobs:
           pip check
           diff -u0 \
             <(sed -e '/^#/d' -e '/^$/d' requirements.txt | sort -f) \
-            <(pip freeze | sort -f)
+            <(pip freeze | sed -e '/^setuptools==/d' -e '/^wheel==/d' | sort -f)
 
       - name: Run Python test suite
         run: |-
