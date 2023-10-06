@@ -27,22 +27,22 @@ jobs:
       - name: Install
         run: |-
           set -x
-          python -m venv venv
+          python3 -m venv venv
           source venv/bin/activate
-          pip install \
+          pip3 install \
             --disable-pip-version-check \
             --ignore-installed \
             pip setuptools wheel
-          pip install -r requirements.txt
-          pip check
+          pip3 install -r requirements.txt
+          pip3 check
           diff -u0 \
             <(sed -e '/^#/d' -e '/^$/d' requirements.txt | sort -f) \
-            <(pip freeze | sed -e '/^setuptools==/d' -e '/^wheel==/d' | sort -f)
+            <(pip3 freeze | sed -e '/^setuptools==/d' -e '/^wheel==/d' | sort -f)
 
       - name: Run Python test suite
         run: |-
           set -x
           source venv/bin/activate
-          python --version
+          python3 --version
           coverage run -m pytest binary_gentoo
           coverage report
