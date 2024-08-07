@@ -10,7 +10,7 @@ coverage==7.6.1
 pytest==8.3.2
 
 # Combined indirect dependencies
-attrs==24.1.0
+attrs==24.2.0
 exceptiongroup==1.2.2
 iniconfig==2.0.0
 packaging==24.1
