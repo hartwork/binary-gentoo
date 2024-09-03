@@ -68,7 +68,9 @@ class EnrichConfigTest(TestCase):
         return (output + '\n').encode('ascii')
 
     def test_portagq_interaction(self):
-        config = parse_command_line(['gentoo-build', 'cat/pkg'])
+        with patch('binary_gentoo.internal.cli.build.HOST_IS_GENTOO', True), \
+                patch('binary_gentoo.internal.cli._parser.HOST_IS_GENTOO', True):
+            config = parse_command_line(['gentoo-build', 'cat/pkg'])
 
         with patch('subprocess.check_output', self._fake_subprocess_check_output), \
                 patch('sys.stdout', StringIO()):
