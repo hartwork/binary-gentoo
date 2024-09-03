@@ -155,7 +155,7 @@ def parse_command_line(argv):
     add_version_argument_to(parser)
     add_pkgdir_argument_to(parser)
 
-    subcommands = parser.add_subparsers(title='subcommands')
+    subcommands = parser.add_subparsers(title='subcommands', required=True)
 
     delete_command = subcommands.add_parser('delete',
                                             help='drop package entries and '
