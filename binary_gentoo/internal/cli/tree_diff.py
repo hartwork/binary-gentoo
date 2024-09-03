@@ -9,6 +9,7 @@ from argparse import ArgumentParser
 from typing import Set
 
 from ..reporter import announce_and_check_output, exception_reporting
+from ._distro import HOST_IS_GENTOO
 from ._parser import add_version_argument_to
 
 _keywords_pattern = re.compile('KEYWORDS="(?P<keywords>[^"]*)"')
@@ -120,9 +121,10 @@ def parse_command_line(argv):
     add_version_argument_to(parser)
 
     parser.add_argument('--keywords',
+                        required=not HOST_IS_GENTOO,
                         help='include only packages/versions/revisions that have these keywords; '
-                        'in case of multiple keywords a space-separated list can be provided '
-                        '(default: auto-detect using portageq)')
+                        'in case of multiple keywords a space-separated list can be provided'
+                        f'{" (default: auto-detect using portageq)" if HOST_IS_GENTOO else ""}')
 
     parser.add_argument('--pessimistic',
                         default=False,

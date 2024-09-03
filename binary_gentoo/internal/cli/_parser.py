@@ -2,6 +2,7 @@
 # Licensed under GNU Affero GPL version 3 or later
 
 from ..version import VERSION_STR
+from ._distro import HOST_IS_GENTOO
 
 
 def add_version_argument_to(parser):
@@ -28,25 +29,35 @@ def add_portdir_argument_to(parser):
         '--portdir',
         dest='host_portdir',
         metavar='DIR',
-        help=(
-            'enforce specific location for PORTDIR'
-            ' (e.g. "/var/db/repos/gentoo" or "/usr/portage", default: auto-detect using portageq)'
-        ))
+        required=not HOST_IS_GENTOO,
+        help=(('enforce specific location for PORTDIR'
+               ' (e.g. "/var/db/repos/gentoo" or "/usr/portage"'
+               ', default: auto-detect using portageq)') if HOST_IS_GENTOO else
+              ('specify PORTDIR'
+               ' (required, would be e.g. "/var/db/repos/gentoo" or "/usr/portage" on Gentoo)')))
 
 
 def add_distdir_argument_to(parser):
-    parser.add_argument('--distdir',
-                        dest='host_distdir',
-                        metavar='DIR',
-                        help='enforce specific location for DISTDIR'
-                        ' (e.g. "/var/cache/distfiles" or "/usr/portage/distfiles", '
-                        'default: auto-detect using portageq)')
+    parser.add_argument(
+        '--distdir',
+        dest='host_distdir',
+        metavar='DIR',
+        required=not HOST_IS_GENTOO,
+        help=(('enforce specific location for DISTDIR'
+               ' (e.g. "/var/cache/distfiles" or "/usr/portage/distfiles"'
+               ', default: auto-detect using portageq)') if HOST_IS_GENTOO else
+              ('specify DISTDIR (required'
+               ', would be e.g. "/var/cache/distfiles" or "/usr/portage/distfiles" on Gentoo)')))
 
 
 def add_pkgdir_argument_to(parser):
-    parser.add_argument('--pkgdir',
-                        dest='host_pkgdir',
-                        metavar='DIR',
-                        help='enforce specific location for PKGDIR'
-                        ' (e.g. "/var/cache/binpkgs" or "/usr/portage/packages", '
-                        'default: auto-detect using portageq)')
+    parser.add_argument(
+        '--pkgdir',
+        dest='host_pkgdir',
+        metavar='DIR',
+        required=not HOST_IS_GENTOO,
+        help=(('enforce specific location for PKGDIR'
+               ' (e.g. "/var/cache/binpkgs" or "/usr/portage/packages"'
+               ', default: auto-detect using portageq)') if HOST_IS_GENTOO else
+              ('specify PKGDIR (required'
+               ', would be e.g. "/var/cache/binpkgs" or "/usr/portage/packages" on Gentoo)')))

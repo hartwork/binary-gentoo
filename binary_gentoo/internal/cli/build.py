@@ -19,6 +19,7 @@ import yaml
 
 from ..atoms import ATOM_LIKE_DISPLAY, SET_DISPLAY, extract_category_package_from, extract_set_from
 from ..reporter import announce_and_call, announce_and_check_output, exception_reporting
+from ._distro import HOST_IS_GENTOO
 from ._enrich import enrich_host_distdir_of, enrich_host_pkgdir_of, enrich_host_portdir_of
 from ._parser import (add_distdir_argument_to, add_docker_image_argument_to,
                       add_interactive_argument_to, add_pkgdir_argument_to, add_portdir_argument_to,
@@ -77,8 +78,10 @@ def parse_command_line(argv):
     parser.add_argument(
         '--gentoo-profile',
         metavar='PROFILE',
-        help='enforce Gentoo profile PROFILE'
-        ' (e.g. "default/linux/amd64/17.1/developer", default: auto-detect using eselect)')
+        required=not HOST_IS_GENTOO,
+        help=(('enforce Gentoo profile PROFILE'
+               ' (e.g. "default/linux/amd64/17.1/developer", default: auto-detect using eselect)')
+              if HOST_IS_GENTOO else 'specify Gentoo profile PROFILE (required)'))
 
     parser.add_argument('--use', help='custom one-off use flags (default: none)')
 
@@ -88,17 +91,25 @@ def parse_command_line(argv):
                         help='enforce custom MAKEOPTS (default: "%(default)s")')
     parser.add_argument('--cflags',
                         metavar='CFLAGS',
-                        help='enforce custom CFLAGS (default: auto-detect using portageq)')
+                        required=not HOST_IS_GENTOO,
+                        help=('enforce custom CFLAGS (default: auto-detect using portageq)'
+                              if HOST_IS_GENTOO else 'specify CFLAGS (required)'))
     parser.add_argument('--cxxflags',
                         metavar='CXXFLAGS',
-                        help='enforce custom CXXFLAGS (default: auto-detect using portageq)')
+                        required=not HOST_IS_GENTOO,
+                        help=('enforce custom CXXFLAGS (default: auto-detect using portageq)'
+                              if HOST_IS_GENTOO else 'specify CXXFLAGS (required)'))
     parser.add_argument('--ldflags',
                         metavar='LDFLAGS',
-                        help='enforce custom LDFLAGS (default: auto-detect using portageq)')
+                        required=not HOST_IS_GENTOO,
+                        help=('enforce custom LDFLAGS (default: auto-detect using portageq)'
+                              if HOST_IS_GENTOO else 'specify LDFLAGS (required)'))
     parser.add_argument('--cpu-flags-x86',
                         metavar='FLAGS',
-                        help='enforce custom CPU_FLAGS_X86'
-                        ' (default: auto-detect using portageq (not cpuid2cpuflags))')
+                        required=not HOST_IS_GENTOO,
+                        help=(('enforce custom CPU_FLAGS_X86'
+                               ' (default: auto-detect using portageq (not cpuid2cpuflags))')
+                              if HOST_IS_GENTOO else 'specify CPU_FLAGS_X86 (required)'))
 
     add_portdir_argument_to(parser)
     add_pkgdir_argument_to(parser)
