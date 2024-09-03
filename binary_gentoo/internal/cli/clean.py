@@ -13,7 +13,7 @@ from ._parser import (add_distdir_argument_to, add_docker_image_argument_to,
 
 
 def parse_command_line(argv):
-    parser = ArgumentParser(prog='gentoo-package-clean',
+    parser = ArgumentParser(prog='gentoo-clean',
                             description='Clean Gentoo pkgdir/distdir files'
                             ' using eclean of app-portage/gentoolkit'
                             ' with Docker isolation')
