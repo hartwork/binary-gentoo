@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from io import StringIO
 from tempfile import TemporaryDirectory
 from textwrap import dedent
-from typing import List
 from unittest import TestCase
 from unittest.mock import call, patch
 
@@ -17,7 +16,7 @@ from ..build import (EmergeTargetType, classify_emerge_target, enrich_config, ma
 
 @dataclass
 class RunRecord:
-    call_args_list: List["call"]
+    call_args_list: list["call"]
 
 
 class ClassifyEmergeTargetTest(TestCase):
@@ -86,7 +85,7 @@ class EnrichConfigTest(TestCase):
 class MainTest(TestCase):
 
     @staticmethod
-    def _run_gentoo_build_with_subprocess_mocked(argv_extra: List[str] = None) -> RunRecord:
+    def _run_gentoo_build_with_subprocess_mocked(argv_extra: list[str] = None) -> RunRecord:
         if argv_extra is None:
             argv_extra = []
 

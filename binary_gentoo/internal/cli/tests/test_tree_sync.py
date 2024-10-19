@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from io import StringIO
 from subprocess import call
 from tempfile import TemporaryDirectory
-from typing import List
 from unittest import TestCase
 from unittest.mock import patch
 
@@ -16,7 +15,7 @@ from ..tree_sync import main
 
 @dataclass
 class RunRecord:
-    call_args_list: List["call"]
+    call_args_list: list["call"]
 
 
 class MainTest(TestCase):

@@ -5,7 +5,6 @@ from dataclasses import dataclass
 from io import StringIO
 from itertools import product
 from tempfile import TemporaryDirectory
-from typing import List
 from unittest import TestCase
 from unittest.mock import call, patch
 
@@ -19,7 +18,7 @@ class RunRecord:
     temp_distdir: str
     temp_pkgdir: str
     temp_portdir: str
-    call_args_list: List["call"]
+    call_args_list: list["call"]
 
 
 class MainTest(TestCase):

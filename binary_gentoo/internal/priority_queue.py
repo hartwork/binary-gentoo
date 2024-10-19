@@ -5,7 +5,6 @@ import heapq
 import json
 import os
 from contextlib import suppress
-from typing import List, Set
 
 from .json_formatter import dump_json_for_humans
 
@@ -22,7 +21,7 @@ class PriorityQueue:
         heapq.heappush(self._min_heap, item)
         self._push_count += 1
 
-    def _remove_from_min_heap(self, atoms: Set[str]) -> Set[str]:
+    def _remove_from_min_heap(self, atoms: set[str]) -> set[str]:
         items = []
         removed_atoms = set()
 
@@ -52,7 +51,7 @@ class PriorityQueue:
         self._priority_of[atom] = priority
         self._push_to_min_heap(priority, atom)
 
-    def drop(self, atoms: List[str]):
+    def drop(self, atoms: list[str]):
         for atom in atoms:
             if atom not in self._priority_of:
                 raise IndexError(f'Atom {atom!r} not currently in the queue')

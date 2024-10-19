@@ -6,7 +6,6 @@ import os
 import re
 import sys
 from argparse import ArgumentParser
-from typing import Set
 
 from ..reporter import announce_and_check_output, exception_reporting
 from ._distro import HOST_IS_GENTOO
@@ -16,8 +15,8 @@ _keywords_pattern = re.compile('KEYWORDS="(?P<keywords>[^"]*)"')
 _filename_9999_pattern = re.compile(r'9999(-r[0-9]+)?\.ebuild$')
 
 
-def _replace_special_keywords_for_ebuild(accept_keywords: Set[str],
-                                         ebuild_keywords: Set[str]) -> Set[str]:
+def _replace_special_keywords_for_ebuild(accept_keywords: set[str],
+                                         ebuild_keywords: set[str]) -> set[str]:
     effective_keywords = set(accept_keywords)
     if '**' in effective_keywords:
         effective_keywords.remove('**')
@@ -31,7 +30,7 @@ def _replace_special_keywords_for_ebuild(accept_keywords: Set[str],
     return effective_keywords
 
 
-def _get_relevant_keywords_set_for(ebuild_filepath: str, accept_keywords: Set[str]) -> Set[str]:
+def _get_relevant_keywords_set_for(ebuild_filepath: str, accept_keywords: set[str]) -> set[str]:
     with open(ebuild_filepath) as ifile:
         ebuild_content = ifile.read()
 
