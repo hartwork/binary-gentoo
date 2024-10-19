@@ -1,3 +1,8 @@
 indent-width = 4
 line-length = 99
 target-version = "py39"
+
+[lint]
+select = [
+    "I",  # isort
+]
