@@ -10,7 +10,6 @@ from .json_formatter import dump_json_for_humans
 
 
 class PriorityQueue:
-
     def __init__(self):
         self._push_count = 0
         self._min_heap = []
@@ -54,7 +53,7 @@ class PriorityQueue:
     def drop(self, atoms: list[str]):
         for atom in atoms:
             if atom not in self._priority_of:
-                raise IndexError(f'Atom {atom!r} not currently in the queue')
+                raise IndexError(f"Atom {atom!r} not currently in the queue")
 
         for removed_atom in self._remove_from_min_heap(set(atoms)):
             del self._priority_of[removed_atom]
@@ -63,7 +62,7 @@ class PriorityQueue:
         try:
             prority, _, atom = heapq.heappop(self._min_heap)
         except IndexError:
-            raise IndexError('Queue is empty')
+            raise IndexError("Queue is empty")
         del self._priority_of[atom]
         return atom, prority
 
@@ -87,24 +86,24 @@ class PriorityQueue:
             doc = json.loads(content)
 
             # TODO proper validation
-            assert doc['version'] == 1
-            q._min_heap = doc['min_heap']
-            q._priority_of = doc['priority_of']
-            q._push_count = doc['push_count']
+            assert doc["version"] == 1
+            q._min_heap = doc["min_heap"]
+            q._priority_of = doc["priority_of"]
+            q._push_count = doc["push_count"]
 
         return q
 
     def save(self, filename):
         doc = {
-            'version': 1,
-            'min_heap': self._min_heap,
-            'priority_of': self._priority_of,
-            'push_count': self._push_count,
+            "version": 1,
+            "min_heap": self._min_heap,
+            "priority_of": self._priority_of,
+            "push_count": self._push_count,
         }
 
-        temp_filename = f'{filename}.tmp'
+        temp_filename = f"{filename}.tmp"
 
-        with open(temp_filename, 'w') as f:
+        with open(temp_filename, "w") as f:
             dump_json_for_humans(doc, f)
 
         os.rename(temp_filename, filename)

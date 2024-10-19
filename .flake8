@@ -1,7 +1,0 @@
-[flake8]
-# E251 unexpected spaces around keyword / parameter equals
-# W503 line break before binary operator
-ignore =
-    E251
-    W503
-max-line-length = 99

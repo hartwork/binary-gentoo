@@ -3,4 +3,4 @@
 
 import os
 
-HOST_IS_GENTOO = os.path.exists('/etc/gentoo-release')
+HOST_IS_GENTOO = os.path.exists("/etc/gentoo-release")

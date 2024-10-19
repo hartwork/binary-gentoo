@@ -22,29 +22,33 @@ class RunRecord:
 
 
 class MainTest(TestCase):
-
     @staticmethod
     def _run_gentoo_clean_with_subprocess_mocked(pretend=False, interactive=True) -> RunRecord:
-        with TemporaryDirectory() as temp_distdir, \
-                TemporaryDirectory() as temp_pkgdir, \
-                TemporaryDirectory() as temp_portdir:
+        with (
+            TemporaryDirectory() as temp_distdir,
+            TemporaryDirectory() as temp_pkgdir,
+            TemporaryDirectory() as temp_portdir,
+        ):
             argv = [
-                'gentoo-clean',
-                '--distdir',
+                "gentoo-clean",
+                "--distdir",
                 temp_distdir,
-                '--pkgdir',
+                "--pkgdir",
                 temp_pkgdir,
-                '--portdir',
+                "--portdir",
                 temp_portdir,
             ]
 
             if pretend:
-                argv.append('--pretend')
+                argv.append("--pretend")
             if not interactive:
-                argv.append('--non-interactive')
+                argv.append("--non-interactive")
 
-            with patch('sys.argv', argv), patch('subprocess.check_call') as check_call_mock, \
-                    patch('sys.stdout', StringIO()):
+            with (
+                patch("sys.argv", argv),
+                patch("subprocess.check_call") as check_call_mock,
+                patch("sys.stdout", StringIO()),
+            ):
                 main()
 
             return RunRecord(
@@ -54,22 +58,22 @@ class MainTest(TestCase):
                 call_args_list=check_call_mock.call_args_list,
             )
 
-    @parameterized.expand(product(['interactive', 'pretend'], [True, False]))
+    @parameterized.expand(product(["interactive", "pretend"], [True, False]))
     def test_argument_forwarded_to_eclean(self, key, value):
         run_record = self._run_gentoo_clean_with_subprocess_mocked(**{key: value})
 
         docker_run_call = run_record.call_args_list[0]
         container_argv_flat = docker_run_call.args[0][-1]
-        self.assertEqual(container_argv_flat.count(f' --{key}'), 2 if value else 0)
+        self.assertEqual(container_argv_flat.count(f" --{key}"), 2 if value else 0)
 
     def test_docker_mounts_fine(self):
         run_record = self._run_gentoo_clean_with_subprocess_mocked()
 
         docker_run_call = run_record.call_args_list[0]
         expected_mounts = [
-            f'{run_record.temp_portdir}:/var/db/repos/gentoo:ro',
-            f'{run_record.temp_pkgdir}:/var/cache/binpkgs:rw',
-            f'{run_record.temp_distdir}:/var/cache/distfiles:rw',
+            f"{run_record.temp_portdir}:/var/db/repos/gentoo:ro",
+            f"{run_record.temp_pkgdir}:/var/cache/binpkgs:rw",
+            f"{run_record.temp_distdir}:/var/cache/distfiles:rw",
         ]
         for expected_mount in expected_mounts:
             self.assertIn(expected_mount, docker_run_call.args[0])

@@ -9,11 +9,10 @@ from binary_gentoo.internal.json_formatter import dump_json_for_humans
 
 
 class DumpJsonForHumansTest(TestCase):
-
     def test_healthy_formatting(self):
         doc = {
-            'k1': 'v1',
-            'k2': 'v2',
+            "k1": "v1",
+            "k2": "v2",
         }
         memory_file = StringIO()
 
@@ -26,4 +25,5 @@ class DumpJsonForHumansTest(TestCase):
               "k1": "v1",
               "k2": "v2"
             }
-        """))
+        """),
+        )
