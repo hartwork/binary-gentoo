@@ -7,5 +7,6 @@ select = [
     "E",  # pycodestyle
     "F",  # Pyflakes + flake8
     "I",  # isort
+    "UP", # pyupgrade
     "W",  # pycodestyle
 ]

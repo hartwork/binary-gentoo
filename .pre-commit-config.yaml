@@ -2,12 +2,6 @@
 # Licensed under GNU Affero GPL version 3 or later
 
 repos:
-  - repo: https://github.com/asottile/pyupgrade
-    rev: v3.18.0
-    hooks:
-      - id: pyupgrade
-        args: ['--py39-plus']
-
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v5.0.0
     hooks:
