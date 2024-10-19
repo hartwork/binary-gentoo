@@ -6,56 +6,57 @@ from setuptools import find_packages, setup
 from binary_gentoo.internal.version import VERSION_STR
 
 _tests_require = [
-    'freezegun',
-    'parameterized',
+    "freezegun",
+    "parameterized",
 ]
 
 _extras_require = {
-    'ci': [
-        'coverage',
-        'pytest',
+    "ci": [
+        "coverage",
+        "pytest",
     ],
-    'tests': _tests_require,
+    "tests": _tests_require,
 }
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     setup(
-        name='binary-gentoo',
+        name="binary-gentoo",
         version=VERSION_STR,
-        license='AGPLv3+',
-        description='CLI tools to build Gentoo packages on a non-Gentoo Linux host',
-        long_description=open('README.md').read(),
-        long_description_content_type='text/markdown',
-        author='Sebastian Pipping',
-        author_email='sebastian@pipping.org',
-        url='https://github.com/hartwork/binary-gentoo',
-        python_requires='>=3.9',
+        license="AGPLv3+",
+        description="CLI tools to build Gentoo packages on a non-Gentoo Linux host",
+        long_description=open("README.md").read(),
+        long_description_content_type="text/markdown",
+        author="Sebastian Pipping",
+        author_email="sebastian@pipping.org",
+        url="https://github.com/hartwork/binary-gentoo",
+        python_requires=">=3.9",
         setup_requires=[
-            'setuptools>=38.6.0',  # for long_description_content_type
+            "setuptools>=38.6.0",  # for long_description_content_type
         ],
         install_requires=[
-            'PyYAML',
+            "PyYAML",
         ],
         extras_require=_extras_require,
         tests_require=_tests_require,
         packages=find_packages(),
         entry_points={
-            'console_scripts': [
-                'gentoo-build = binary_gentoo.internal.cli.build:main',
-                'gentoo-clean = binary_gentoo.internal.cli.clean:main',
-                'gentoo-local-queue = binary_gentoo.internal.cli.local_queue:main',
-                'gentoo-packages = binary_gentoo.internal.cli.packages:main',
-                'gentoo-tree-diff = binary_gentoo.internal.cli.tree_diff:main',
-                'gentoo-tree-sync = binary_gentoo.internal.cli.tree_sync:main',
+            "console_scripts": [
+                "gentoo-build = binary_gentoo.internal.cli.build:main",
+                "gentoo-clean = binary_gentoo.internal.cli.clean:main",
+                "gentoo-local-queue = binary_gentoo.internal.cli.local_queue:main",
+                "gentoo-packages = binary_gentoo.internal.cli.packages:main",
+                "gentoo-tree-diff = binary_gentoo.internal.cli.tree_diff:main",
+                "gentoo-tree-sync = binary_gentoo.internal.cli.tree_sync:main",
             ],
         },
         classifiers=[
-            'Programming Language :: Python',
-            'Programming Language :: Python :: 3',
-            'Programming Language :: Python :: 3.9',
-            'Programming Language :: Python :: 3.10',
-            'Programming Language :: Python :: 3.11',
-            'Programming Language :: Python :: 3.12',
-            'Programming Language :: Python :: 3.13',
-            'Programming Language :: Python :: 3 :: Only',
-        ])
+            "Programming Language :: Python",
+            "Programming Language :: Python :: 3",
+            "Programming Language :: Python :: 3.9",
+            "Programming Language :: Python :: 3.10",
+            "Programming Language :: Python :: 3.11",
+            "Programming Language :: Python :: 3.12",
+            "Programming Language :: Python :: 3.13",
+            "Programming Language :: Python :: 3 :: Only",
+        ],
+    )

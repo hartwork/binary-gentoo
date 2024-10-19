@@ -32,9 +32,9 @@ def run_pop(config):
     q.save(config.state_filename)
 
     doc = {
-        'atom': atom,
-        'priority': priority,
-        'version': 2,
+        "atom": atom,
+        "priority": priority,
+        "version": 2,
     }
 
     dump_json_for_humans(doc, sys.stdout)
@@ -49,49 +49,59 @@ def run_show(config):
 
 def run(config):
     run_function = {
-        'drop': run_drop,
-        'pop': run_pop,
-        'push': run_push,
-        'show': run_show,
+        "drop": run_drop,
+        "pop": run_pop,
+        "push": run_push,
+        "show": run_show,
     }[config.command]
 
-    with file_based_interprocess_locking(f'{config.state_filename}.lock'):
+    with file_based_interprocess_locking(f"{config.state_filename}.lock"):
         run_function(config)
 
 
 def parse_command_line(argv):
-    parser = ArgumentParser(prog='gentoo-local-queue',
-                            description='Manages simple file-based push/pop build task queues')
+    parser = ArgumentParser(
+        prog="gentoo-local-queue",
+        description="Manages simple file-based push/pop build task queues",
+    )
 
     add_version_argument_to(parser)
 
-    parser.add_argument('--state',
-                        metavar='FILENAME',
-                        dest='state_filename',
-                        default=os.path.expanduser('~/.gentoo-build-queue.json'),
-                        help='where to store state (default: "%(default)s")')
+    parser.add_argument(
+        "--state",
+        metavar="FILENAME",
+        dest="state_filename",
+        default=os.path.expanduser("~/.gentoo-build-queue.json"),
+        help='where to store state (default: "%(default)s")',
+    )
 
-    subparsers = parser.add_subparsers(title='sub-cli', dest='command', required=True)
+    subparsers = parser.add_subparsers(title="sub-cli", dest="command", required=True)
 
-    push_command = subparsers.add_parser('push', description='Add atoms to the queue')
-    push_command.add_argument('priority',
-                              type=float,
-                              metavar='PRIORITY',
-                              help='task priority (float, smallest priority wins)')
-    push_command.add_argument('atoms',
-                              metavar='ATOM',
-                              nargs='+',
-                              help=f'package atom to push (format "{ATOM_LIKE_DISPLAY}")')
+    push_command = subparsers.add_parser("push", description="Add atoms to the queue")
+    push_command.add_argument(
+        "priority",
+        type=float,
+        metavar="PRIORITY",
+        help="task priority (float, smallest priority wins)",
+    )
+    push_command.add_argument(
+        "atoms",
+        metavar="ATOM",
+        nargs="+",
+        help=f'package atom to push (format "{ATOM_LIKE_DISPLAY}")',
+    )
 
-    drop_command = subparsers.add_parser('drop', description='Drop atoms from the queue')
-    drop_command.add_argument('atoms',
-                              metavar='ATOM',
-                              nargs='+',
-                              help=f'package atom to drop (format "{ATOM_LIKE_DISPLAY}")')
+    drop_command = subparsers.add_parser("drop", description="Drop atoms from the queue")
+    drop_command.add_argument(
+        "atoms",
+        metavar="ATOM",
+        nargs="+",
+        help=f'package atom to drop (format "{ATOM_LIKE_DISPLAY}")',
+    )
 
-    subparsers.add_parser('pop', description='Pop atoms from the queue (respecting priority)')
+    subparsers.add_parser("pop", description="Pop atoms from the queue (respecting priority)")
 
-    subparsers.add_parser('show', description='Show queued atoms and their priorities')
+    subparsers.add_parser("show", description="Show queued atoms and their priorities")
 
     config = parser.parse_args(argv[1:])
 

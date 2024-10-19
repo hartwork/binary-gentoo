@@ -11,7 +11,7 @@ from unittest.mock import patch
 
 
 def _announce_command(argv):
-    print('# ' + shlex.join(argv))
+    print("# " + shlex.join(argv))
 
 
 def announce_and_call(argv, stdout=None):
@@ -21,14 +21,13 @@ def announce_and_call(argv, stdout=None):
 
 def announce_and_check_output(argv):
     _announce_command(argv)
-    return subprocess.check_output(argv).decode('utf-8')
+    return subprocess.check_output(argv).decode("utf-8")
 
 
 class _ReadableCalledProcessError(CalledProcessError):
-
     def __str__(self):
         flat_quoted_cmd = shlex.join(self.cmd)
-        with patch.object(self, 'cmd', 'X'):
+        with patch.object(self, "cmd", "X"):
             res = super().__str__().replace("Command 'X'", f'Command "{flat_quoted_cmd}"')
         return res
 
@@ -49,5 +48,5 @@ def exception_reporting():
     except KeyboardInterrupt:
         sys.exit(128 + signal.SIGINT)
     except Exception as e:
-        print(f'ERROR: {e}', file=sys.stderr)
+        print(f"ERROR: {e}", file=sys.stderr)
         sys.exit(1)

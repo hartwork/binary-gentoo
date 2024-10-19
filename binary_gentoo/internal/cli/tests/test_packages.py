@@ -12,8 +12,15 @@ from unittest.mock import Mock, patch
 from freezegun import freeze_time
 from parameterized import parameterized
 
-from ..packages import (adjust_index_file_header, has_safe_package_path, main, parse_package_block,
-                        read_packages_index_file, run_delete, run_list)
+from ..packages import (
+    adjust_index_file_header,
+    has_safe_package_path,
+    main,
+    parse_package_block,
+    read_packages_index_file,
+    run_delete,
+    run_list,
+)
 
 
 class ParsePackageBlockTest(TestCase):
@@ -51,25 +58,24 @@ class ParsePackageBlockTest(TestCase):
 
     def test_extraction(self):
         package = parse_package_block(self._REALISTIC_PACKAGE_BLOCK_WITHOUT_PATH)
-        self.assertEqual(package.full_name, 'xfce-base/xfce4-settings-4.16.2-1')
+        self.assertEqual(package.full_name, "xfce-base/xfce4-settings-4.16.2-1")
         self.assertEqual(package.build_time, 1625051237)
-        self.assertEqual(package.cpv, 'xfce-base/xfce4-settings-4.16.2')
+        self.assertEqual(package.cpv, "xfce-base/xfce4-settings-4.16.2")
 
     def test_contained_path_retrieved(self):
         package = parse_package_block(self._REALISTIC_PACKAGE_BLOCK_WITHOUT_PATH)
-        self.assertEqual(package.path, 'xfce-base/xfce4-settings-4.16.2.tbz2')
+        self.assertEqual(package.path, "xfce-base/xfce4-settings-4.16.2.tbz2")
 
     def test_missing_path_inferred(self):
         package = parse_package_block(self._DUMMY_PACKAGE_BLOCK_WITH_PATH)
-        self.assertEqual(package.path, 'cat/pkg/pkg-123-1.xpak')
+        self.assertEqual(package.path, "cat/pkg/pkg-123-1.xpak")
 
     def test_missing_build_id(self):
         package = parse_package_block(self._DUMMY_PACKAGE_BLOCK_WITHOUT_BLOCK_ID)
-        self.assertEqual(package.path, 'cat/pkg-123.tbz2')
+        self.assertEqual(package.path, "cat/pkg-123.tbz2")
 
 
 class AdjustIndexFileHeaderTest(TestCase):
-
     def test_replacement(self):
         original_dummy_header = dedent("""\
             PACKAGES: 758
@@ -86,18 +92,20 @@ class AdjustIndexFileHeaderTest(TestCase):
         actual_header = adjust_index_file_header(
             old_header=original_dummy_header,
             new_package_count=new_package_count,
-            new_modification_timestamp=new_modification_timestamp)
+            new_modification_timestamp=new_modification_timestamp,
+        )
         self.assertEqual(actual_header, expected_header)
 
 
 class HasSafePackagePathTest(TestCase):
-
-    @parameterized.expand([
-        ('cat/pkg/pkg-123-1.xpak', True, 'healthy .xpak'),
-        ('cat/pkg-123.tbz2', True, 'healthy .tbz2'),
-        ('../pkg-123.tbz2', False, 'bad ..'),
-        ('/cat/pkg-123.tbz2', False, 'bad leading slash'),
-    ])
+    @parameterized.expand(
+        [
+            ("cat/pkg/pkg-123-1.xpak", True, "healthy .xpak"),
+            ("cat/pkg-123.tbz2", True, "healthy .tbz2"),
+            ("../pkg-123.tbz2", False, "bad .."),
+            ("/cat/pkg-123.tbz2", False, "bad leading slash"),
+        ]
+    )
     def test(self, candidate_path, expected_is_safe, _comment):
         package_mock = Mock(path=candidate_path)
         actual_is_safe = has_safe_package_path(package_mock)
@@ -105,20 +113,26 @@ class HasSafePackagePathTest(TestCase):
 
 
 class ReadPackagesIndexFileTest(TestCase):
-
     def test_success(self):
-        expected_header = 'K1: v1'
-        expected_packages_blocks = ['K2: v2', 'K3: v3', '']
+        expected_header = "K1: v1"
+        expected_packages_blocks = ["K2: v2", "K3: v3", ""]
 
         with TemporaryDirectory() as tempdir:
-            expected_packages_index_filename = os.path.join(tempdir, 'Packages')
-            with open(expected_packages_index_filename, 'w') as f:
+            expected_packages_index_filename = os.path.join(tempdir, "Packages")
+            with open(expected_packages_index_filename, "w") as f:
                 flat_packages_blocks = "\n\n".join(expected_packages_blocks)
-                print(f'{expected_header}\n\n{flat_packages_blocks}', end='', file=f)
+                print(
+                    f"{expected_header}\n\n{flat_packages_blocks}",
+                    end="",
+                    file=f,
+                )
             config_mock = Mock(host_pkgdir=tempdir)
 
-            actual_header, actual_packages_blocks, actual_packages_index_filename \
-                = read_packages_index_file(config_mock)
+            (
+                actual_header,
+                actual_packages_blocks,
+                actual_packages_index_filename,
+            ) = read_packages_index_file(config_mock)
 
         self.assertEqual(actual_header, expected_header)
         self.assertEqual(actual_packages_blocks, expected_packages_blocks)
@@ -126,17 +140,18 @@ class ReadPackagesIndexFileTest(TestCase):
 
 
 class RunDeleteTest(TestCase):
-
     @staticmethod
     def _create_empty_file(filename):
         os.makedirs(os.path.dirname(filename))
-        with open(filename, 'w'):
+        with open(filename, "w"):
             pass
 
-    @parameterized.expand([
-        ('pretend', True),
-        ('actually delete files', False),
-    ])
+    @parameterized.expand(
+        [
+            ("pretend", True),
+            ("actually delete files", False),
+        ]
+    )
     def test_success(self, _label, pretend):
         original_dummy_index_content = dedent("""\
             PACKAGES: 2
@@ -165,44 +180,48 @@ class RunDeleteTest(TestCase):
         """)
 
         with TemporaryDirectory() as tempdir:
-            binary_path_one = os.path.join(tempdir, 'one/one-1.tbz2')
-            binary_path_two = os.path.join(tempdir, 'two/two-2.tbz2')
+            binary_path_one = os.path.join(tempdir, "one/one-1.tbz2")
+            binary_path_two = os.path.join(tempdir, "two/two-2.tbz2")
 
-            with open(os.path.join(tempdir, 'Packages'), 'w') as f:
-                print(original_dummy_index_content, end='', file=f)
+            with open(os.path.join(tempdir, "Packages"), "w") as f:
+                print(original_dummy_index_content, end="", file=f)
             self._create_empty_file(binary_path_one)
             self._create_empty_file(binary_path_two)
 
             # This will delete the first of the two packages
             config_mock = Mock(
                 host_pkgdir=tempdir,
-                metadata='BUILD_TIME: 1',
+                metadata="BUILD_TIME: 1",
                 pretend=pretend,
             )
 
             time_mock = Mock(return_value=float(now_epoch_seconds))
-            with patch('time.time', time_mock), patch('sys.stdout', StringIO()):
+            with patch("time.time", time_mock), patch("sys.stdout", StringIO()):
                 run_delete(config_mock)
 
-            with open(os.path.join(tempdir, 'Packages')) as f:
+            with open(os.path.join(tempdir, "Packages")) as f:
                 actual_post_deletion_index_content = f.read()
 
             if pretend:
                 self.assertTrue(os.path.exists(binary_path_one))
                 self.assertTrue(os.path.exists(binary_path_two))
-                self.assertEqual(actual_post_deletion_index_content, original_dummy_index_content)
+                self.assertEqual(
+                    actual_post_deletion_index_content,
+                    original_dummy_index_content,
+                )
             else:
                 self.assertFalse(os.path.exists(binary_path_one))
                 self.assertTrue(os.path.exists(binary_path_two))
-                self.assertEqual(actual_post_deletion_index_content,
-                                 expected_post_deletion_index_content)
+                self.assertEqual(
+                    actual_post_deletion_index_content,
+                    expected_post_deletion_index_content,
+                )
 
 
 class RunListTest(TestCase):
-
     @staticmethod
     def _run_list_with_config(config):
-        with patch('sys.stdout', StringIO()) as stdout_mock:
+        with patch("sys.stdout", StringIO()) as stdout_mock:
             run_list(config)
         return stdout_mock.getvalue()
 
@@ -230,8 +249,8 @@ class RunListTest(TestCase):
 
         with TemporaryDirectory() as tempdir:
             config_mock = Mock(atoms=False, host_pkgdir=tempdir)
-            with open(os.path.join(tempdir, 'Packages'), 'w') as f:
-                print(dummy_index_content, end='', file=f)
+            with open(os.path.join(tempdir, "Packages"), "w") as f:
+                print(dummy_index_content, end="", file=f)
 
             with freeze_time(tz_offset=4):
                 actual_stdout__summary = self._run_list_with_config(config_mock)
@@ -244,26 +263,35 @@ class RunListTest(TestCase):
 
 
 class MainTest(TestCase):
-
-    @parameterized.expand([
-        ('gentoo-packages', '--help'),
-        ('gentoo-packages', 'delete', '--help'),
-        ('gentoo-packages', 'list', '--help'),
-    ])
+    @parameterized.expand(
+        [
+            ("gentoo-packages", "--help"),
+            ("gentoo-packages", "delete", "--help"),
+            ("gentoo-packages", "list", "--help"),
+        ]
+    )
     def test_help(self, *argv):  # plain smoke test
-        with patch('sys.argv', argv), patch('sys.stdout', StringIO()) as stdout_mock:
+        with (
+            patch("sys.argv", argv),
+            patch("sys.stdout", StringIO()) as stdout_mock,
+        ):
             with self.assertRaises(SystemExit) as catcher:
                 main()
-            self.assertEqual(catcher.exception.args, (0, ))  # i.e. success
+            self.assertEqual(catcher.exception.args, (0,))  # i.e. success
             if sys.version_info >= (3, 10):
-                self.assertIn('options:', stdout_mock.getvalue())
+                self.assertIn("options:", stdout_mock.getvalue())
             else:
-                self.assertIn('optional arguments:', stdout_mock.getvalue())
+                self.assertIn("optional arguments:", stdout_mock.getvalue())
 
-    def test_list_failure_empty_directory(self):  # just something that touches beyond argparse
+    def test_list_failure_empty_directory(
+        self,
+    ):  # just something that touches beyond argparse
         with TemporaryDirectory() as tempdir:
-            argv = ['gentoo-packages', '--pkgdir', tempdir, 'list']
-            with patch('sys.argv', argv), patch('sys.stderr', StringIO()), \
-                    self.assertRaises(SystemExit) as catcher:
+            argv = ["gentoo-packages", "--pkgdir", tempdir, "list"]
+            with (
+                patch("sys.argv", argv),
+                patch("sys.stderr", StringIO()),
+                self.assertRaises(SystemExit) as catcher,
+            ):
                 main()
-            self.assertEqual(catcher.exception.args, (1, ))  # i.e. error
+            self.assertEqual(catcher.exception.args, (1,))  # i.e. error

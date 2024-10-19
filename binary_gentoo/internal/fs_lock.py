@@ -8,7 +8,7 @@ from contextlib import contextmanager, suppress
 
 @contextmanager
 def file_based_interprocess_locking(lock_filename):
-    with open(lock_filename, 'w') as lock:
+    with open(lock_filename, "w") as lock:
         fcntl.lockf(lock, fcntl.LOCK_EX)  # may block
         try:
             yield
