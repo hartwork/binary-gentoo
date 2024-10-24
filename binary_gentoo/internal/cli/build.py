@@ -164,8 +164,13 @@ def parse_command_line(argv):
         "--etc-portage",
         dest="host_etc_portage",
         metavar="DIR",
+        required=not HOST_IS_GENTOO,
         default="/etc/portage",
-        help='enforce specific location for /etc/portage (default: "%(default)s")',
+        help=(
+            'enforce specific location for /etc/portage (default: "%(default)s")'
+            if HOST_IS_GENTOO
+            else "specify /etc/portage location (required)"
+        ),
     )
 
     parser_group_flavors_or_image = parser.add_mutually_exclusive_group()

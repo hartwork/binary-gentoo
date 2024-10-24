@@ -107,6 +107,7 @@ class MainTest(TestCase):
             TemporaryDirectory() as temp_pkgdir,
             TemporaryDirectory() as temp_portdir,
             TemporaryDirectory() as temp_logdir,
+            TemporaryDirectory() as temp_etcportagedir,
         ):
             argv = (
                 [
@@ -119,6 +120,8 @@ class MainTest(TestCase):
                     temp_portdir,
                     "--logdir",
                     temp_logdir,
+                    "--etc-portage",
+                    temp_etcportagedir,
                     "--gentoo-profile",
                     "default/linux/profile123",
                     "--cflags",
