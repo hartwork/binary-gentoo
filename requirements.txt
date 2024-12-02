@@ -7,7 +7,7 @@ parameterized==0.9.0
 
 # CI dependencies (from setup.py section "extras_require['ci']")
 coverage==7.6.8
-pytest==8.3.3
+pytest==8.3.4
 
 # Combined indirect dependencies
 attrs==24.2.0
