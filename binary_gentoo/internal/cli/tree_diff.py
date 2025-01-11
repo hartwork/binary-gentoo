@@ -130,9 +130,9 @@ def parse_command_line(argv):
     parser.add_argument(
         "--keywords",
         required=not HOST_IS_GENTOO,
-        help='include only packages/versions/revisions that have these keywords; '
-        'in case of multiple keywords a space-separated list can be provided'
-        f'{" (default: auto-detect using portageq)" if HOST_IS_GENTOO else ""}',
+        help="include only packages/versions/revisions that have these keywords; "
+        "in case of multiple keywords a space-separated list can be provided"
+        f"{' (default: auto-detect using portageq)' if HOST_IS_GENTOO else ''}",
     )
 
     parser.add_argument(

@@ -31,7 +31,7 @@ def parse_command_line(argv):
     parser.add_argument(
         "host_portdir",
         metavar="DIR",
-        help=("location for PORTDIR" ' (e.g. "/var/db/repos/gentoo" or "/usr/portage")'),
+        help=('location for PORTDIR (e.g. "/var/db/repos/gentoo" or "/usr/portage")'),
     )
 
     parser.add_argument(

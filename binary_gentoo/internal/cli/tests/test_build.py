@@ -71,7 +71,7 @@ class EnrichConfigTest(TestCase):
         elif argv == ["portageq", "envvar", "CPU_FLAGS_X86"]:
             output = cls.magic_cpu_flags_x86
         else:
-            output = f'Hello from: {" ".join(argv)}'
+            output = f"Hello from: {' '.join(argv)}"
         return (output + "\n").encode("ascii")
 
     def test_portagq_interaction(self):
