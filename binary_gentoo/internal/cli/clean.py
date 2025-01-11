@@ -41,13 +41,13 @@ def parse_command_line(argv):
         "--pretend",
         default=False,
         action="store_true",
-        help="only display what would be cleaned " "(default: delete files)",
+        help="only display what would be cleaned (default: delete files)",
     )
     eclean_pkg_group.add_argument(
         "--time-limit",
         default="30d",
         metavar="DURATION",
-        help="exclude files modified since DURATION from deletion" ' (default: "%(default)s")',
+        help='exclude files modified since DURATION from deletion (default: "%(default)s")',
     )
 
     return parser.parse_args(argv[1:])

@@ -36,7 +36,7 @@ def parse_package_block(package_block: str) -> BinaryPackage:
         d[key] = value
 
     try:
-        full_name = f'{d["CPV"]}-{d["BUILD_ID"]}'
+        full_name = f"{d['CPV']}-{d['BUILD_ID']}"
     except KeyError:  # for FEATURES=-binpkg-multi-instance
         full_name = d["CPV"]
 
@@ -44,7 +44,7 @@ def parse_package_block(package_block: str) -> BinaryPackage:
         full_name=full_name,
         build_time=int(d["BUILD_TIME"]),
         cpv=d["CPV"],
-        path=d.get("PATH", f'{d["CPV"]}.tbz2'),  # for FEATURES=-binpkg-multi-instance
+        path=d.get("PATH", f"{d['CPV']}.tbz2"),  # for FEATURES=-binpkg-multi-instance
     )
 
 
@@ -166,7 +166,7 @@ def run_list(config):
 def parse_command_line(argv):
     parser = ArgumentParser(
         prog="gentoo-packages",
-        description="Do operations on pkgdir" ' (other than "emaint --fix binhost")',
+        description='Do operations on pkgdir (other than "emaint --fix binhost")',
     )
 
     add_version_argument_to(parser)
@@ -176,7 +176,7 @@ def parse_command_line(argv):
 
     delete_command = subcommands.add_parser(
         "delete",
-        help="drop package entries and " "delete their respective .xpak/.tbz2 files",
+        help="drop package entries and delete their respective .xpak/.tbz2 files",
     )
     delete_command.add_argument(
         "--metadata",
@@ -189,7 +189,7 @@ def parse_command_line(argv):
         "--pretend",
         default=False,
         action="store_true",
-        help="only display what would be cleaned " "(default: delete files)",
+        help="only display what would be cleaned (default: delete files)",
     )
     delete_command.set_defaults(command_func=run_delete)
 

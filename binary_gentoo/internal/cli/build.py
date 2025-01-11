@@ -309,7 +309,7 @@ def build(config):
 
     emerge = ["env"] + emerge_env + ["emerge"] + emerge_args
     emerge_quoted_flat = " ".join(emerge)
-    rebuild_or_not = f'--usepkg={"n" if config.enforce_rebuild else "y"}'
+    rebuild_or_not = f"--usepkg={'n' if config.enforce_rebuild else 'y'}"
 
     container_profile_dir = os.path.join(container_portdir, "profiles", config.gentoo_profile)
     container_portdir_dir_link_target = "/var/db/repos/gentoo"

@@ -65,7 +65,7 @@ class EnrichConfigTest(TestCase):
         if argv == ["portageq", "envvar", "ACCEPT_KEYWORDS"]:
             stdout = cls.magic_keywords
         else:
-            stdout = f'Hello from: {" ".join(argv)}'
+            stdout = f"Hello from: {' '.join(argv)}"
         return (stdout + "\n").encode("ascii")
 
     def test_given__empty(self):
