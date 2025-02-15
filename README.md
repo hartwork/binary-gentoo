@@ -44,6 +44,11 @@ Install Docker, Python >=3.9, pip and rsync and then:
 
 ## Active Binhost Operation
 
+Let's start with a picture:
+
+[![How do binary-gentoo's tools play together?](binary-gentoo.svg)](binary-gentoo.svg)
+(Graphviz source: [`binary-gentoo.dot`](binary-gentoo.dot))
+
 To set-up an active binhost using **binary-gentoo** you will likely need
 a virtual machine with…
 

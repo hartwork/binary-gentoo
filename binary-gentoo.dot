@@ -1,0 +1,80 @@
+// Copyright (C) 2024 Sebastian Pipping <sebastian@pipping.org>
+// Licensed under GNU Affero GPL version 3 or later
+
+digraph "binary-gentoo" {
+  label="How do binary-gentoo's tools play together?";
+  labelloc="t";
+  fontsize="30";
+
+  // Colors: https://graphviz.org/doc/info/colors.html
+
+  // Nodes: Tools
+  "gentoo-build" [style=filled; fillcolor="limegreen", fontname="monospace"];
+  "gentoo-clean" [style=filled; fillcolor="limegreen", fontname="monospace"];
+  "gentoo-local-queue" [style=filled; fillcolor="limegreen", fontname="monospace"];
+  "gentoo-packages" [style=filled; fillcolor="limegreen", fontname="monospace", label="gentoo-packages {delete,list}"];
+  "gentoo-tree-diff" [style=filled; fillcolor="limegreen", fontname="monospace"];
+  "gentoo-tree-sync" [style=filled; fillcolor="limegreen", fontname="monospace"];
+
+  // Nodes: Outputs
+  "ATOM_1" [style=filled; fillcolor="lightblue", label="Atom"];
+
+  // Nodes: Inputs
+  "GENTOO" [style=filled; fillcolor="mediumorchid1"; label="Gentoo"];
+  "ATOM_2" [style=filled; fillcolor="lightblue", label="Atom"];
+  "COMPILE_FLAGS" [style=filled; fillcolor="lightblue", label="CFLAGS, LDFLAGS, .."];
+
+  // Nodes: Directories
+  "etc-portage" [style=filled; fillcolor="darkseagreen1", label=" etc-portage/"];
+  "distdir" [style=filled; fillcolor="darkseagreen1", label=" distdir/"];
+  "logdir" [style=filled; fillcolor="darkseagreen1", label=" logdir/"];
+  "pkgdir" [style=filled; fillcolor="darkseagreen1", label=" pkgdir/"];
+  "portdir" [style=filled; fillcolor="darkseagreen1", label=" portdir/"];
+  "portdir-old" [style=filled; fillcolor="darkseagreen1", label=" portdir-old/"];
+
+  subgraph cluster_monitoring {
+    label="Monitor";
+
+    // "gentoo-tree-diff"
+    portdir -> "gentoo-tree-diff" [label="read by"];
+    "portdir-old" -> "gentoo-tree-diff" [label="read by"];
+
+    // "gentoo-tree-sync"
+    GENTOO -> "gentoo-tree-sync" [label="read by"];
+    "gentoo-tree-sync" -> portdir [label="(reads from\nand)\nwrites to"];
+    "gentoo-tree-sync" -> "portdir-old" [label="writes to"];
+  }
+
+  "gentoo-tree-diff" -> ATOM_1 [label="yields"];
+
+  subgraph cluster_queue {
+    label="  Build Queue ";
+    "gentoo-local-queue";
+  }
+
+  // "gentoo-local-queue"
+  ATOM_1 -> "gentoo-local-queue" [label="push"];
+  "gentoo-local-queue" -> ATOM_2 [label="pop"];
+
+  subgraph cluster_worker {
+    label="Worker";
+
+    // "gentoo-build"
+    "gentoo-build" -> pkgdir [label="writes to"];
+    COMPILE_FLAGS -> "gentoo-build" [label="read by"];
+    "etc-portage" -> "gentoo-build" [label="read by"];
+    portdir -> "gentoo-build" [label="read by"];
+    "gentoo-build" -> logdir [label="writes to"];
+    "gentoo-build" -> distdir [label="(reads from\nand)\nwrites to"];
+
+    // "gentoo-clean"
+    portdir -> "gentoo-clean" [label="read by"];
+    "gentoo-clean" -> distdir [label="(reads from\nand)\nwrites to"];
+    "gentoo-clean" -> pkgdir [label="(reads from\nand)\nwrites to"];
+
+    // "gentoo-packages"
+    "gentoo-packages" -> pkgdir [label="(reads from\nand)\nwrites to"];
+  }
+
+  ATOM_2 -> "gentoo-build" [label="built by"];
+}
