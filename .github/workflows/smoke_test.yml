@@ -79,7 +79,7 @@ jobs:
 
           gentoo-build \
               --non-interactive \
-              --gentoo-profile default/linux/amd64/17.1/developer \
+              --gentoo-profile default/linux/amd64/23.0 \
               --cflags '-O0 -pipe' \
               --cxxflags '-O0 -pipe' \
               --ldflags '-Wl,-O0 -Wl,--as-needed' \
