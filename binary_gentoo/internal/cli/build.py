@@ -313,15 +313,13 @@ def build(config):
 
     container_profile_dir = os.path.join(container_portdir, "profiles", config.gentoo_profile)
     container_portdir_dir_link_target = "/var/db/repos/gentoo"
-    container_make_profile = "/etc/make.profile"
+    container_make_profile = "/etc/portage/make.profile"
     container_command_shared_prefix = [
         f"ln -s {shlex.quote(container_portdir)} {shlex.quote(container_portdir_dir_link_target)}",
         "mkdir -p -m 0775 /run/lock",  # needed by e.g. pkg_postinst of app-text/docbook-xml-dtd
         "set -x",
-        # This is to avoid access to potentially missing link /etc/portage/make.profile .
-        # We cannot run "eselect profile set <profile>" because
-        # that would create /etc/portage/make.profile rather than /etc/make.profile .
-        f"ln -f -s {shlex.quote(container_profile_dir)} {shlex.quote(container_make_profile)}",  # noqa: E501
+        f"rm -f {shlex.quote(container_make_profile)}",
+        f"ln -s {shlex.quote(container_profile_dir)} {shlex.quote(container_make_profile)}",
     ]
 
     # Create log dir
