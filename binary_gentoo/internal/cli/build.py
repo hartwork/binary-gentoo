@@ -90,7 +90,7 @@ def parse_command_line(argv):
         help=(
             (
                 "enforce Gentoo profile PROFILE"
-                ' (e.g. "default/linux/amd64/17.1/developer", default: auto-detect using eselect)'
+                ' (e.g. "default/linux/amd64/23.0", default: auto-detect using eselect)'
             )
             if HOST_IS_GENTOO
             else "specify Gentoo profile PROFILE (required)"
