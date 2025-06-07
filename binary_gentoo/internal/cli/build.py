@@ -285,6 +285,7 @@ def build(config):
         ]
     )
     emerge_env = [
+        "LC_ALL=C",
         "EMERGE_DEFAULT_OPTS=",  # so that we win over /etc/portage/make.conf
         f"FEATURES={shlex.quote(features_flat)}",
         f"PORTDIR={shlex.quote(container_portdir)}",
