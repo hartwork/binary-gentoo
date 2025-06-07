@@ -89,13 +89,13 @@ jobs:
               --distdir distfiles/ \
               --logdir logs/ \
               --etc-portage etc-portage/ \
-              media-gfx/optipng
+              sys-process/htop
 
           find logs/ packages/
 
           gentoo-packages --pkgdir packages/ list
           sudo chown -R "${USER}:${USER}" packages/
-          gentoo-packages --pkgdir packages/ delete --metadata media-gfx/optipng
+          gentoo-packages --pkgdir packages/ delete --metadata sys-process/htop
           gentoo-packages --pkgdir packages/ list
 
           find packages/
