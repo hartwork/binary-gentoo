@@ -268,6 +268,8 @@ def build(config):
             "--newuse",
             "--deep",
         ]
+    if config.fail_to_shell:
+        emerge_args.append("--fail-clean=n")
 
     features_flat = " ".join(
         [
