@@ -2,7 +2,6 @@
 # Licensed under GNU Affero GPL version 3 or later
 
 import os
-import sys
 from io import StringIO
 from tempfile import TemporaryDirectory
 from textwrap import dedent
@@ -278,10 +277,7 @@ class MainTest(TestCase):
             with self.assertRaises(SystemExit) as catcher:
                 main()
             self.assertEqual(catcher.exception.args, (0,))  # i.e. success
-            if sys.version_info >= (3, 10):
-                self.assertIn("options:", stdout_mock.getvalue())
-            else:
-                self.assertIn("optional arguments:", stdout_mock.getvalue())
+            self.assertIn("options:", stdout_mock.getvalue())
 
     def test_list_failure_empty_directory(
         self,
