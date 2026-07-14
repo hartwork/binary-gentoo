@@ -151,7 +151,7 @@ that **both the consumer machines and the producer machine can execute**
 
 For the example above, I ended up with these values for the producer machine:
 
-- `CFLAGS`: `-march=x86-64 -mtune=sandybridge -maes --param l1-cache-line-size=64 --param l1-cache-size=32 --param l2-cache-size=3072 -mpclmul -mpopcnt -msse4.1 -msse4.2 -mssse3  -O2 -pipe` (note `-march` and `-mtune` in particular)
+- `CFLAGS`: `-march=x86-64 -mtune=sandybridge -maes --param l1-cache-line-size=64 --param l1-cache-size=32 --param l2-cache-size=3072 -mpclmul -mpopcnt -msse4.1 -msse4.2 -mssse3 -O2 -pipe` (note `-march` and `-mtune` in particular)
 - `CXXFLAGS`: same as `CFLAGS`
 - `LDFLAGS`: whatever `portageq envvar LDFLAGS` on the consumer machine returns
 - `CPU_FLAGS_X86`: `aes mmx mmxext pclmul popcnt sse sse2 sse3 sse4_1 sse4_2 ssse3` (i.e. without `avx` and without `rdrand`)
