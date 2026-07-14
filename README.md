@@ -18,7 +18,7 @@ A typical scenario is operation of an
 with Docker isolation and a full `emerge` perspective
 (while not affecting your host system).
 
-There currently four CLI tools
+There are currently six CLI tools
 that follow the [Unix philosophy](https://en.wikipedia.org/wiki/Unix_philosophy)
 and are meant to be combined using a glue language like Bash:
 
