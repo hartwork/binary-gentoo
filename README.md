@@ -1,6 +1,19 @@
 [![pre-commit](https://img.shields.io/badge/pre--commit-enabled-brightgreen?logo=pre-commit)](https://github.com/pre-commit/pre-commit)
 [![Build and smoke test](https://github.com/hartwork/binary-gentoo/actions/workflows/smoke_test.yml/badge.svg)](https://github.com/hartwork/binary-gentoo/actions/workflows/smoke_test.yml)
 
+> [!IMPORTANT]
+> This project is in **maintenance mode**. That means that I will:
+>
+> - :white_check_mark: continue to apply dependency updates and bug fixes, but will
+> - :no_entry_sign: not add any new features, and will
+> - :no_entry_sign: not take time to review pull requests adding features
+>   or making bigger changes.
+>
+> Thanks for your understanding! :pray:
+>
+> Sebastian Pipping — Berlin, 2026-07-14
+
+
 # binary-gentoo
 
 ## About
