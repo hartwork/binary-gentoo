@@ -83,13 +83,27 @@ class PriorityQueue:
                 if not content:
                     return q
 
-            doc = json.loads(content)
+            try:
+                doc = json.loads(content)
+            except json.JSONDecodeError as e:
+                raise ValueError(f"Queue file {filename!r} is not valid JSON: {e}") from e
 
             # TODO proper validation
-            assert doc["version"] == 1
-            q._min_heap = doc["min_heap"]
-            q._priority_of = doc["priority_of"]
-            q._push_count = doc["push_count"]
+            try:
+                version = doc["version"]
+                min_heap = doc["min_heap"]
+                priority_of = doc["priority_of"]
+                push_count = doc["push_count"]
+            except (KeyError, TypeError) as e:
+                raise ValueError(f"Queue file {filename!r} is missing required data: {e}") from e
+            if version != 1:
+                raise ValueError(
+                    f"Queue file {filename!r} has unsupported version {version!r}"
+                    " (expected version 1)"
+                )
+            q._min_heap = min_heap
+            q._priority_of = priority_of
+            q._push_count = push_count
 
         return q
 
