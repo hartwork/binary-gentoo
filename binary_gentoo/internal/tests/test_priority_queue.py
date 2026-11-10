@@ -2,6 +2,7 @@
 # Licensed under GNU Affero GPL version 3 or later
 
 import json
+import os
 from tempfile import NamedTemporaryFile
 from unittest import TestCase
 
@@ -123,6 +124,40 @@ class LoadSaveTest(TestCase):
             q = PriorityQueue.load(f.name)
 
         self.assertEqual(list(q), self.expected_loaded)
+
+    def _write_queue_file(self, content):
+        with NamedTemporaryFile(mode="w", suffix=".json", delete=False) as f:
+            f.write(content)
+            return f.name
+
+    def test_load__corrupt_file__raises_value_error(self):
+        filename = self._write_queue_file("{corrupt json")
+        try:
+            with self.assertRaises(ValueError) as catcher:
+                PriorityQueue.load(filename)
+        finally:
+            os.unlink(filename)
+        self.assertIn("not valid JSON", str(catcher.exception))
+
+    def test_load__missing_keys__raises_value_error(self):
+        filename = self._write_queue_file('{"version": 1}')
+        try:
+            with self.assertRaises(ValueError) as catcher:
+                PriorityQueue.load(filename)
+        finally:
+            os.unlink(filename)
+        self.assertIn("missing required data", str(catcher.exception))
+
+    def test_load__unsupported_version__raises_value_error(self):
+        filename = self._write_queue_file(
+            '{"version": 2, "min_heap": [], "priority_of": {}, "push_count": 0}'
+        )
+        try:
+            with self.assertRaises(ValueError) as catcher:
+                PriorityQueue.load(filename)
+        finally:
+            os.unlink(filename)
+        self.assertIn("unsupported version", str(catcher.exception))
 
     def test_save(self):
         q = PriorityQueue()
